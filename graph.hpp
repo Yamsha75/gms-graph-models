@@ -1,39 +1,39 @@
 #pragma once
 
+#include <limits>
 #include <list>
 #include <map>
 #include <set>
-#include <limits>
 
-
-typedef unsigned long Vertex;
+typedef unsigned long vertex;
+typedef unsigned long distance;
 
 class Graph {
-private:
-    Vertex vertexCount = 0;
-    std::map<Vertex, std::set<Vertex>> edges;
-
 public:
-    static const long inf = std::numeric_limits<long>::max() / 2;
+    static const distance inf = std::numeric_limits<distance>::max() / 2;
+
+    vertex vertexCount = 0;
+    std::map<vertex, std::set<vertex>> edges;
 
     Graph();
-    Graph(const Graph& other);
-    Graph(const std::list<std::set<Vertex>> vertices);
+    Graph(const Graph& o); // copy constructor
+    Graph(const std::list<std::set<vertex>>& listOfVertexEdges);
 
     ~Graph();
 
-    unsigned long getVertexCount();
-    const std::map<Vertex, std::set<Vertex>> getEdges();
+    // adding vertices and edges
+    vertex addVertex();
+    vertex addVertex(const std::set<vertex>& vertexEdges); // new vertex with edges to !existing! vertices
+    void addEdge(vertex a, vertex b);
+    vertex mergeGraph(const Graph& o); // adds other to this, without any edges between
 
-    Vertex addVertex();
-    Vertex addVertex(const std::set<Vertex> vertexEdges);
-    bool addEdge(Vertex a, Vertex b);
+    bool areVerticesNeighbours(vertex a, vertex b);
 
-    Vertex mergeGraph(const Graph other);
+    void calculateDistancesToRootBFS(std::map<vertex, std::map<vertex, distance>>& distances, vertex limit = 0);
 
-    bool areVerticesNeighbours(Vertex a, Vertex b);
+    void calculateAllDistancesFW(std::map<vertex, std::map<vertex, distance>>& distances, bool skipInit = false);
 
-    unsigned long calculateSumOfDistances();
+    distance calculateSumOfDistances(std::map<vertex, std::map<vertex, distance>>& distances);
 
-    void print();
+    const void print();
 };

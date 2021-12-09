@@ -4,160 +4,163 @@
 #include <queue>
 
 Graph::Graph() {
-#ifdef DEBUG
-    printf("init graph %p\n", (void*)this);
-#endif
-
     edges = {};
 };
 
-Graph::Graph(const Graph& other) {
-    Graph();
+Graph::Graph(const Graph& o) : Graph() {
+    vertexCount = o.vertexCount;
 
-    vertexCount = other.vertexCount;
-
-    for (auto const& pair : other.edges)
+    for (auto const& pair : o.edges)
         edges[pair.first] = pair.second;
 }
 
-Graph::Graph(const std::list<std::set<Vertex>> vertices) {
-    Graph();
-
-    Vertex vertex = 0;
-    for (auto const& vertexEdges : vertices)
-        edges[vertex++] = vertexEdges;
-
-    vertexCount = vertex;
+Graph::Graph(const std::list<std::set<vertex>>& listOfVertexEdges) : Graph() {
+    for (auto const& vertexEdges : listOfVertexEdges)
+        edges[vertexCount++] = std::set<vertex>(vertexEdges);
 }
 
-Graph::~Graph(void) {
-#ifdef DEBUG
-    printf("de-init graph %p\n", (void*)this);
-#endif
+Graph::~Graph(void) {}
+
+vertex Graph::addVertex() {
+    vertex v = vertexCount++;
+
+    edges[v] = {};
+
+    return v;
 }
 
-unsigned long Graph::getVertexCount() {
-    return vertexCount;
+vertex Graph::addVertex(const std::set<vertex>& vertexEdges) {
+    vertex v = vertexCount++;
+
+    edges[v] = std::set<vertex>(vertexEdges);
+
+    for (auto const& n : vertexEdges)
+        edges[n].insert(v);
+
+    return v;
 }
 
-const std::map<Vertex, std::set<Vertex>> Graph::getEdges() {
-    return edges;
-}
-
-Vertex Graph::addVertex() {
-    Vertex vertex = vertexCount++;
-
-    edges[vertex] = {};
-
-    return vertex;
-}
-
-Vertex Graph::addVertex(const std::set<Vertex> vertexEdges) {
-    Vertex vertex = vertexCount++;
-
-    edges[vertex] = vertexEdges;
-
-    for (auto const& neighbour : vertexEdges)
-        edges[neighbour].insert(vertex);
-
-    return vertex;
-}
-
-bool Graph::addEdge(Vertex a, Vertex b) {
-#ifdef DEBUG
-    printf("new edge: %lu - %lu\n", a, b);
-#endif
-
+void Graph::addEdge(vertex a, vertex b) {
     edges[a].insert(b);
     edges[b].insert(a);
-
-    return true;
 }
 
-Vertex Graph::mergeGraph(const Graph other) {
-    Vertex offset = getVertexCount();
+vertex Graph::mergeGraph(const Graph& o) {
+    vertex offset = vertexCount;
 
     // add all vertices and edges from other graph, creating two disconnected graphs
-    for (auto const& pair : other.edges) {
-        Vertex vertex = pair.first + offset;
+    for (auto const& pair : o.edges) {
+        vertex v = pair.first + offset;
 
-        edges[vertex] = {};
+        edges[v] = {};
 
         for (auto const& neighbour : pair.second)
-            edges[vertex].insert(neighbour + offset);
+            edges[v].insert(neighbour + offset);
     }
 
     // update vertexCount
-    vertexCount += other.vertexCount;
+    vertexCount += o.vertexCount;
 
     return offset;
 }
 
-bool Graph::areVerticesNeighbours(Vertex a, Vertex b) {
+bool Graph::areVerticesNeighbours(vertex a, vertex b) {
     auto neighbours = edges[a];
 
     return neighbours.find(b) != neighbours.end();
 }
 
-unsigned long Graph::calculateSumOfDistances() {
-    std::map<Vertex, std::map<Vertex, long>> dist = {};
+void Graph::calculateDistancesToRootBFS(std::map<vertex, std::map<vertex, distance>>& distances, vertex limit) {
+    // limit == 0 means no limit (all vertices)
+    if (limit == 0)
+        limit = vertexCount;
 
-    // initialize distances for each pair
-    for (Vertex i = 0; i < vertexCount; i++) {
-        dist[i] = {};
-        dist[i][i] = 0;
-    }
+    // calculate shortest distances from root to each vertex smaller than limit using simple BFS
+    std::set<vertex> visited = {};
+    std::queue<vertex> toVisit = {};
 
-    for (Vertex i = 0; i < vertexCount; i++) {
-        for (Vertex j = i + 1; j < vertexCount; j++) {
-            if (areVerticesNeighbours(i, j)) {
-                // direct neighbours
-                dist[i][j] = 1;
-                dist[j][i] = 1;
-            }
-            else {
-                dist[i][j] = inf;
-                dist[j][i] = inf;
-            }
+    toVisit.push(0);
+    toVisit.push(limit);
+
+    distance d = 0;
+
+    while (!toVisit.empty()) {
+        vertex v = toVisit.front();
+        toVisit.pop();
+
+        if (v == limit) {
+            d++;
+            if (!toVisit.empty())
+                toVisit.push(limit);
+        }
+        else {
+            if (visited.find(v) != visited.end())
+                continue;
+
+            visited.insert(v);
+            distances[0][v] = d;
+
+            for (auto const& n : edges[v])
+                if (n < limit and visited.find(n) == visited.end())
+                    toVisit.push(n);
         }
     }
+}
 
-    // calculate shortest distance between each pair
-    for (Vertex k = 0; k < vertexCount; k++) {
-        for (Vertex i = 0; i < vertexCount; i++) {
-            for (Vertex j = 0; j < vertexCount; j++) {
-                if (dist[i][j] > dist[i][k] + dist[k][j])
-                    dist[i][j] = dist[i][k] + dist[k][j];
+void Graph::calculateAllDistancesFW(std::map<vertex, std::map<vertex, distance>>& distances, bool skipInit) {
+    if (!skipInit)
+        // initial distances for self and neighbours for each vertex
+        for (vertex a = 0; a < vertexCount; a++) {
+            distances[a][a] = 0;
+
+            for (vertex b = a + 1; b < vertexCount; b++) {
+                if (areVerticesNeighbours(a, b)) {
+                    distances[a][b] = 1;
+                    distances[b][a] = 1;
+                }
+                else {
+                    distances[a][b] = inf;
+                    distances[b][a] = inf;
+                }
             }
         }
-    }
 
-    // sum all distances
-    unsigned long sum = 0;
+    // calculate shortest distance between each pair of vertices, using Floyd–Warshall algorithm
+    for (vertex k = 0; k < vertexCount; k++)
+        for (vertex i = 0; i < vertexCount; i++)
+            for (vertex j = 0; j < vertexCount; j++)
+                if (distances[i][j] > distances[i][k] + distances[k][j])
+                    distances[i][j] = distances[i][k] + distances[k][j];
 
-    for (Vertex i = 0; i < vertexCount; i++) {
-        for (Vertex j = i + 1; j < vertexCount; j++)
-            sum += dist[i][j];
-    }
+    // done
+}
+
+distance Graph::calculateSumOfDistances(std::map<vertex, std::map<vertex, distance>>& distances) {
+    distance sum = 0;
+
+    for (vertex a = 0; a < vertexCount; a++)
+        for (vertex b = a + 1; b < vertexCount; b++) {
+            distance d = distances[a][b];
+            if (d == inf)
+                printf("distance between %lu and %lu couldn't be calculated!\n", a, b);
+            sum += d;
+        }
 
     return sum;
 }
 
-void Graph::print() {
-    // printf("Graph %p:\n", (void*)this);
+const void Graph::print() {
     printf("Graph:\n");
 
-    std::set<Vertex> visitedVertices = {};
+    std::set<vertex> visited = {};
 
-    for (auto const& pair : edges) {
-        if (visitedVertices.find(pair.first) == visitedVertices.end()) {
+    for (auto const& pair : edges)
+        if (visited.find(pair.first) == visited.end()) {
             printf("  %lu:", pair.first);
 
-            for (auto const& vertex : pair.second) {
-                printf(" %lu,", vertex);
-            }
+            for (auto const& vertex : pair.second)
+                printf(" %lu", vertex);
 
             printf("\n");
         }
-    }
 }

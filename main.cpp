@@ -1,22 +1,34 @@
 #include <stdio.h>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <iterator>
 
 #include "graph.hpp"
 
 #include "barabasi.hpp"
 
+// #define DEBUG
+
 void calculateGraph(unsigned int modelIndex, unsigned long modelParameters) {
     Graph g;
 
+#ifdef DEBUG
+    printf("calculating for %u, %lu\n", modelIndex, modelParameters);
+#endif
+
     switch (modelIndex) {
-    case BARABASI:
-        g = barabasi(modelParameters);
-        printf("%lu\n", g.calculateSumOfDistances());
+    case BARABASI: {
+        Barabasi b = Barabasi(modelParameters);
+
+        printf("%lu\n", b.calculateSumOfDistances());
+
         break;
+    }
     default:
+        printf("-1\n");
         return;
     }
-
-    // g.print();
 }
 
 int main(int argc, char* argv[]) {
@@ -41,7 +53,7 @@ int main(int argc, char* argv[]) {
     }
     else {
         // await parameters from stdin
-        while (scanf("%u %ld", &modelIndex, &modelParameters) == 2)
+        while (scanf("%u %lu", &modelIndex, &modelParameters) == 2)
             calculateGraph(modelIndex, modelParameters);
     }
 
