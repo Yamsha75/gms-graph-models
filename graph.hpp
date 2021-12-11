@@ -2,38 +2,42 @@
 
 #include <limits>
 #include <list>
-#include <map>
 #include <set>
+#include <vector>
 
-typedef unsigned long vertex;
-typedef unsigned long distance;
+typedef size_t Vertex;
+typedef std::set<Vertex> Neighbours;
+typedef std::vector<Neighbours> Edges;
+
+typedef unsigned long Distance;
+typedef std::vector<std::vector<Distance>> DistancesMatrix;
 
 class Graph {
 public:
-    static const distance inf = std::numeric_limits<distance>::max() / 2;
+    static const Distance inf = std::numeric_limits<Distance>::max() / 2;
 
-    vertex vertexCount = 0;
-    std::map<vertex, std::set<vertex>> edges;
+    Vertex vertexCount = 0;
+    Edges edges;
 
-    Graph();
-    Graph(const Graph& o); // copy constructor
-    Graph(const std::list<std::set<vertex>>& listOfVertexEdges);
+    Graph(Vertex vertexCount = 0);
+    Graph(const Edges& e);
+    Graph(const Graph& o) : Graph(o.edges) {} // copy constructor
 
     ~Graph();
 
     // adding vertices and edges
-    vertex addVertex();
-    vertex addVertex(const std::set<vertex>& vertexEdges); // new vertex with edges to !existing! vertices
-    void addEdge(vertex a, vertex b);
-    vertex mergeGraph(const Graph& o); // adds other to this, without any edges between
+    Vertex addVertex();
+    Vertex addVertex(const Neighbours& neighbours); // new vertex with edges to !existing! vertices
+    void addEdge(Vertex a, Vertex b);
+    Vertex mergeGraph(const Graph& o); // adds other to this, without any edges between
 
-    bool areVerticesNeighbours(vertex a, vertex b);
+    bool areVerticesNeighbours(Vertex a, Vertex b);
 
-    void calculateDistancesToRootBFS(std::map<vertex, std::map<vertex, distance>>& distances, vertex limit = 0);
+    void calculateDistancesToRootBFS(DistancesMatrix& distances, Vertex limit = 0);
 
-    void calculateAllDistancesFW(std::map<vertex, std::map<vertex, distance>>& distances, bool skipInit = false);
-
-    distance calculateSumOfDistances(std::map<vertex, std::map<vertex, distance>>& distances);
+    Distance calculateSumOfDistances(DistancesMatrix& distances);
+    // Distance calculateSumOfDistancesBFS(); // simple BFS algorithm
+    Distance calculateSumOfDistancesFW(); // Floyd–Warshall algorithm
 
     const void print();
 };
