@@ -27,7 +27,7 @@ const Vertex Barabasi::toDecimal(Ternary t, size_t skipDigits) {
     return result;
 }
 
-Barabasi::Barabasi(unsigned short int iterations) : iterations(iterations), graph(pow(3.0f, (float)iterations)) {
+Barabasi::Barabasi(unsigned short int iterations) : iterations(iterations), graph((Vertex)pow(3.0f, (float)iterations)) {
     // step 0
     graph.addVertex();
 
@@ -121,18 +121,11 @@ Distance Barabasi::calculateSumOfDistances() {
 
     // calculate shortest distances from root to each vertex with oldest base3 digit equal to 0
     // simple BFS, starting at root (0)
-    graph.calculateDistancesFromRootBFS(distances, graph.vertexCount / 3);
-
-    Vertex lim = graph.vertexCount / 3;
-
-    for (Vertex a = 1; a < lim; a++) {
-        if (distances[0][a] == graph.inf)
-            printf("! %lu\n", a);
-    }
+    graph.calculateDistancesFromRootBFS(distances, graph.vertexCount);
 
     // calculate shortest distances for each pair of vertices, skipping if both vertices have
     // an ID with oldest digit in ternary equal to 0
-    for (Vertex a = 0; a < graph.vertexCount; a++) {
+    for (Vertex a = 1; a < graph.vertexCount; a++) {
         Ternary ta = ternaryVertices[a];
 
         for (Vertex b = a + 1; b < graph.vertexCount; b++) {
@@ -162,11 +155,11 @@ Distance Barabasi::calculateSumOfDistances() {
             // all paths go through root, so we can use a sum of distances to root
 
             // ensure paths from root to both vertices exist
-            if (distances[0][a] == graph.inf)
-                distances[0][a] = calculateShortestPathFromRoot(a);
+            // if (distances[0][a] == graph.inf)
+            //     distances[0][a] = calculateShortestPathFromRoot(a);
 
-            if (distances[0][b] == graph.inf)
-                distances[0][b] = calculateShortestPathFromRoot(b);
+            // if (distances[0][b] == graph.inf)
+            //     distances[0][b] = calculateShortestPathFromRoot(b);
 
             distances[a][b] = distances[0][a] + distances[0][b];
         }
