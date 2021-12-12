@@ -9,19 +9,19 @@ typedef size_t Vertex;
 typedef std::set<Vertex> Neighbours;
 typedef std::vector<Neighbours> Edges;
 
-typedef unsigned long Distance;
+typedef unsigned long int Distance;
 typedef std::vector<std::vector<Distance>> DistancesMatrix;
 
 class Graph {
 public:
     static const Distance inf = std::numeric_limits<Distance>::max() / 2;
 
+    Vertex maxVertexCount;
     Vertex vertexCount = 0;
     Edges edges;
 
-    Graph(Vertex vertexCount = 0);
-    Graph(const Edges& e);
-    Graph(const Graph& o) : Graph(o.edges) {} // copy constructor
+    Graph(Vertex maxVertexCount);
+    Graph(const Graph& o, Vertex maxVertexCount = 0); // copy constructor
 
     ~Graph();
 
@@ -33,10 +33,12 @@ public:
 
     bool areVerticesNeighbours(Vertex a, Vertex b);
 
-    void calculateDistancesToRootBFS(DistancesMatrix& distances, Vertex limit = 0);
+    void calculateDistancesFromVertexBFS(Vertex s, DistancesMatrix& distances, Vertex limit = 0);
+    void calculateDistancesFromRootBFS(DistancesMatrix& distances, Vertex limit = 0);
 
     Distance calculateSumOfDistances(DistancesMatrix& distances);
-    // Distance calculateSumOfDistancesBFS(); // simple BFS algorithm
+
+    Distance calculateSumOfDistancesBFS(); // simple BFS algorithm
     Distance calculateSumOfDistancesFW(); // Floyd–Warshall algorithm
 
     const void print();

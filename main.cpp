@@ -4,15 +4,11 @@
 #include <sstream>
 #include <iterator>
 
-#include "graph.hpp"
-
 #include "barabasi.hpp"
 
 // #define DEBUG
 
 void calculateGraph(unsigned int modelIndex, unsigned long modelParameters) {
-    Graph g;
-
 #ifdef DEBUG
     printf("calculating for %u, %lu\n", modelIndex, modelParameters);
 #endif

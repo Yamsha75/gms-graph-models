@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <stdio.h>
+#include <math.h>
 
 Ternary Barabasi::toTernary(Vertex v) {
     auto result = Ternary(iterations);
@@ -26,10 +27,7 @@ const Vertex Barabasi::toDecimal(Ternary t, size_t skipDigits) {
     return result;
 }
 
-Barabasi::Barabasi(unsigned short int iterations) : iterations(iterations) {
-    // generate graph
-    graph = Graph();
-
+Barabasi::Barabasi(unsigned short int iterations) : iterations(iterations), graph(pow(3.0f, (float)iterations)) {
     // step 0
     graph.addVertex();
 
@@ -40,7 +38,7 @@ Barabasi::Barabasi(unsigned short int iterations) : iterations(iterations) {
 
     // further steps
     for (unsigned short int step = 2; step <= iterations; step++) {
-        Graph gc = Graph(graph); // copy of graph
+        Graph gc = Graph(graph, graph.vertexCount); // copy of graph
 
         for (unsigned int _ = 0; _ < 2; _++) {
             Vertex offset = graph.mergeGraph(gc);
@@ -68,7 +66,6 @@ Distance Barabasi::calculateShortestPathFromRoot(Vertex f) {
     Distance d = 0; // distance from current vertex to root
 
     Vertex c; // candidate vertex
-    unsigned short int dm; // number of ternary digits matched for candidate
 
     while (v != f) {
         d++;
@@ -79,7 +76,7 @@ Distance Barabasi::calculateShortestPathFromRoot(Vertex f) {
         if (graph.edges[v].find(f) != graph.edges[v].end())
             return d;
 
-        dm = 0;
+        unsigned short int dm = 0; // number of ternary digits matched for candidate
 
         for (auto const& n : graph.edges[v]) {
             Ternary tn = ternaryVertices[n];
@@ -105,69 +102,77 @@ Distance Barabasi::calculateShortestPathFromRoot(Vertex f) {
 }
 
 Distance Barabasi::calculateSumOfDistances() {
-    return graph.calculateSumOfDistancesFW();
+    // return graph.calculateSumOfDistancesBFS();
+    // return graph.calculateSumOfDistancesFW();
 
     // init a map with distances between every possible pair of vertices
-    // DistancesMatrix distances = DistancesMatrix(graph.vertexCount);
+    DistancesMatrix distances = DistancesMatrix(graph.vertexCount);
 
-    // for (Vertex v = 0; v < graph.vertexCount; v++) {
-    //     distances[v] = std::vector<Distance>(graph.vertexCount);
+    for (Vertex a = 0; a < graph.vertexCount; a++) {
+        distances[a] = std::vector<Distance>(graph.vertexCount);
 
-    //     for (Vertex o = v + 1; o < graph.vertexCount; o++) {
-    //         if (graph.areVerticesNeighbours(v, o))
-    //             distances[v][o] = 1;
-    //         else
-    //             distances[v][o] = graph.inf;
-    //     }
-    // }
+        for (Vertex b = a + 1; b < graph.vertexCount; b++) {
+            if (graph.areVerticesNeighbours(a, b))
+                distances[a][b] = 1;
+            else
+                distances[a][b] = graph.inf;
+        }
+    }
 
-    // // calculate shortest distances from root to each vertex with oldest base3 digit equal to 0
-    // // simple BFS, starting at root (0)
-    // graph.calculateDistancesToRootBFS(distances, graph.vertexCount / 3);
+    // calculate shortest distances from root to each vertex with oldest base3 digit equal to 0
+    // simple BFS, starting at root (0)
+    graph.calculateDistancesFromRootBFS(distances, graph.vertexCount / 3);
 
-    // // calculate shortest distances for each pair of vertices, skipping if both vertices have
-    // // an ID with oldest digit in ternary equal to 0
-    // for (Vertex a = 0; a < graph.vertexCount; a++) {
-    //     Ternary ta = ternaryVertices[a];
+    Vertex lim = graph.vertexCount / 3;
 
-    //     for (Vertex b = a + 1; b < graph.vertexCount; b++) {
-    //         if (distances[a][b] != graph.inf)
-    //             continue;
+    for (Vertex a = 1; a < lim; a++) {
+        if (distances[0][a] == graph.inf)
+            printf("! %lu\n", a);
+    }
 
-    //         Ternary tb = ternaryVertices[b];
+    // calculate shortest distances for each pair of vertices, skipping if both vertices have
+    // an ID with oldest digit in ternary equal to 0
+    for (Vertex a = 0; a < graph.vertexCount; a++) {
+        Ternary ta = ternaryVertices[a];
 
-    //         unsigned short int similarDigits = 0;
-    //         for (unsigned short int i = 0; i < iterations; i++)
-    //             if (ta[i] != tb[i]) {
-    //                 similarDigits = i;
-    //                 break;
-    //             }
+        for (Vertex b = a + 1; b < graph.vertexCount; b++) {
+            if (distances[a][b] != graph.inf)
+                continue;
 
-    //         if (similarDigits > 0) {
-    //             // case can be simplified to base group, which is precalculated; for example:
-    //             // distance between 2201 (73) and 2210 (75) is the same as between 01 (1) and 10 (3)
-    //             Vertex as = toDecimal(ta, similarDigits);
-    //             Vertex bs = toDecimal(tb, similarDigits);
+            Ternary tb = ternaryVertices[b];
 
-    //             if (a != as and b != bs) {
-    //                 distances[a][b] = distances[as][bs];
-    //                 continue;
-    //             }
-    //         }
-    //         // all paths go through root, so we can use a sum of distances to root
+            unsigned short int similarDigits = 0;
+            for (unsigned short int i = 0; i < iterations; i++)
+                if (ta[i] != tb[i]) {
+                    similarDigits = i;
+                    break;
+                }
 
-    //         // ensure paths from root to both vertices exist
-    //         if (distances[0][a] == graph.inf)
-    //             distances[0][a] = calculateShortestPathFromRoot(a);
+            if (similarDigits > 0) {
+                // case can be simplified to base group, which is precalculated; for example:
+                // distance between 2201 (73) and 2210 (75) is the same as between 01 (1) and 10 (3)
+                Vertex as = toDecimal(ta, similarDigits);
+                Vertex bs = toDecimal(tb, similarDigits);
 
-    //         if (distances[0][b] == graph.inf)
-    //             distances[0][b] = calculateShortestPathFromRoot(b);
+                if (a != as and b != bs) {
+                    distances[a][b] = distances[as][bs];
+                    continue;
+                }
+            }
+            // all paths go through root, so we can use a sum of distances to root
 
-    //         distances[a][b] = distances[0][a] + distances[0][b];
-    //     }
-    // }
+            // ensure paths from root to both vertices exist
+            if (distances[0][a] == graph.inf)
+                distances[0][a] = calculateShortestPathFromRoot(a);
 
-    // return graph.calculateSumOfDistances(distances);
+            if (distances[0][b] == graph.inf)
+                distances[0][b] = calculateShortestPathFromRoot(b);
+
+            distances[a][b] = distances[0][a] + distances[0][b];
+        }
+    }
+
+    return graph.calculateSumOfDistances(distances);
 }
 
 void Barabasi::print() {
