@@ -44,9 +44,9 @@ Vertex Graph::mergeGraph(const Graph& o) {
     // add all vertices and edges from other graph, creating two disconnected graphs
     Vertex offset = vertexCount;
 
-    for (Vertex i = 0; i < o.vertexCount; i++)
-        for (auto const& n : o.edges[i])
-            edges[i + offset].insert(n + offset);
+    for (Vertex v = 0; v < o.vertexCount; v++)
+        for (auto const& n : o.edges[v])
+            edges[v + offset].insert(n + offset);
 
     vertexCount += o.vertexCount;
 
