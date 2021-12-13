@@ -1,10 +1,15 @@
-#include "graph.hpp"
+#pragma once
 
 #include <vector>
 
+#include "graph.hpp"
+
+
 #define BARABASI 0
 
+
 typedef std::vector<unsigned short int> Ternary; // vector of ternary (base3) digits
+
 
 class Barabasi {
 private:

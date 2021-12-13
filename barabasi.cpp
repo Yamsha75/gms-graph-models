@@ -1,8 +1,8 @@
-#include "barabasi.hpp"
-
-#include <queue>
 #include <stdio.h>
 #include <math.h>
+#include <queue>
+
+#include "barabasi.hpp"
 
 Ternary Barabasi::toTernary(Vertex v) {
     auto result = Ternary(iterations);

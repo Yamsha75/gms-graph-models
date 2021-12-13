@@ -1,7 +1,8 @@
-#include "graph.hpp"
-
 #include <stdio.h>
 #include <queue>
+
+#include "graph.hpp"
+
 
 Graph::Graph(Vertex maxVertexCount) : maxVertexCount(maxVertexCount) {
     // init adjacency lists

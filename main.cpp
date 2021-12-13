@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <string>
-#include <iostream>
 #include <sstream>
+#include <iostream>
+#include <string>
 #include <iterator>
 
 #include "barabasi.hpp"

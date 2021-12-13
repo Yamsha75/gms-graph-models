@@ -1,9 +1,9 @@
 #pragma once
 
 #include <limits>
-#include <list>
 #include <set>
 #include <vector>
+
 
 typedef size_t Vertex;
 typedef std::set<Vertex> Neighbours;
@@ -11,6 +11,7 @@ typedef std::vector<Neighbours> Edges;
 
 typedef unsigned long int Distance;
 typedef std::vector<std::vector<Distance>> DistancesMatrix;
+
 
 class Graph {
 public:
