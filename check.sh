@@ -14,6 +14,7 @@ for TEST in "$@"; do
 
     if [ -f $FILE ]; then
         while read LINE; do
+            echo $LINE
             time ./gms $LINE >> $TEMP
         done < $FILE
     else
