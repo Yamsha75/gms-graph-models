@@ -60,17 +60,15 @@ bool Graph::areVerticesNeighbours(Vertex a, Vertex b) {
     return neighbours.find(b) != neighbours.end();
 }
 
-void Graph::calculateDistancesFromVertexBFS(Vertex s, DistancesMatrix& distances, Vertex limit) {
-    // limit == 0 means no limit (all vertices)
-    if (limit == 0)
-        limit = vertexCount;
+void Graph::calculateDistancesFromVertexBFS(DistancesMatrix& distances, Vertex s, Vertex min, Vertex max) {
+    if (max == 0)
+        max = vertexCount;
 
-    // calculate shortest distances from v to each vertex within limit using simple BFS
     std::set<Vertex> visited = {};
     std::queue<Vertex> open = {};
 
     open.push(s);
-    open.push(limit);
+    open.push(max);
 
     Distance d = 0;
 
@@ -78,32 +76,41 @@ void Graph::calculateDistancesFromVertexBFS(Vertex s, DistancesMatrix& distances
         Vertex v = open.front();
         open.pop();
 
-        if (v == limit) {
+        if (v == max) {
             if (!open.empty()) {
                 d++;
-                open.push(limit);
+                open.push(max);
             }
         }
         else if (visited.find(v) == visited.end()) {
             visited.insert(v);
-            distances[std::min(s, v)][std::max(s, v)] = d;
 
-            for (auto const& n : edges[v])
-                if (n < limit and visited.find(n) == visited.end())
+            if (v > s)
+                distances[s][v] = d;
+
+            for (Vertex n : edges[v])
+                if (n >= min and n < max and visited.find(n) == visited.end())
                     open.push(n);
         }
     }
 }
 
-void Graph::calculateDistancesFromRootBFS(DistancesMatrix& distances, Vertex limit) {
-    return calculateDistancesFromVertexBFS(0, distances, limit);
+void Graph::calculateDistancesBetweenVerticesBFS(DistancesMatrix& distances, Vertex min, Vertex max) {
+    if (max == 0)
+        max = vertexCount;
+
+    for (Vertex s = min; s < max; s++)
+        calculateDistancesFromVertexBFS(distances, s, min, max);
 }
 
-Distance Graph::calculateSumOfDistances(DistancesMatrix& distances) {
+Distance Graph::calculateSumOfDistances(DistancesMatrix& distances, Vertex min, Vertex max) {
+    if (max == 0)
+        max = vertexCount;
+
     Distance sum = 0;
 
-    for (Vertex a = 0; a < vertexCount; a++)
-        for (Vertex b = a + 1; b < vertexCount; b++)
+    for (Vertex a = min; a < max; a++)
+        for (Vertex b = a + 1; b < max; b++)
             sum += distances[a][b];
 
     return sum;
@@ -179,6 +186,7 @@ Distance Graph::calculateSumOfDistancesFW() {
                 if (distances[i][j] > distances[i][k] + distances[k][j])
                     distances[i][j] = distances[i][k] + distances[k][j];
 
+    // calculate the sum of shortest distances and return it
     return calculateSumOfDistances(distances);
 }
 

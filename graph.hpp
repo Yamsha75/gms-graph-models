@@ -22,25 +22,44 @@ public:
     Edges edges;
 
     Graph(Vertex maxVertexCount);
-    Graph(const Graph& o, Vertex maxVertexCount = 0); // copy constructor
+
+    // copy constructor
+    Graph(const Graph& o, Vertex maxVertexCount = 0);
 
     ~Graph();
 
-    // adding vertices and edges
+    // add a new vertex without any edges; returns new vertex ID
     Vertex addVertex();
-    Vertex addVertex(const Neighbours& neighbours); // new vertex with edges to !existing! vertices
+
+    // add a new vertex with preexisint edges; returns new vertex ID
+    Vertex addVertex(const Neighbours& neighbours);
+
+    // add a new edge between existing edges
     void addEdge(Vertex a, Vertex b);
-    Vertex mergeGraph(const Graph& o); // adds other to this, without any edges between
+
+    // adds other graph to this, with no edges between; effectively two disjointed graphs
+    Vertex mergeGraph(const Graph& o);
 
     bool areVerticesNeighbours(Vertex a, Vertex b);
 
-    void calculateDistancesFromVertexBFS(Vertex s, DistancesMatrix& distances, Vertex limit = 0);
-    void calculateDistancesFromRootBFS(DistancesMatrix& distances, Vertex limit = 0);
+    // calculate distances between vertex s and every other with ID between min and max;
+    // max == 0 means max = vertexCount
+    void calculateDistancesFromVertexBFS(DistancesMatrix& distances, Vertex s = 0, Vertex min = 0, Vertex max = 0);
 
-    Distance calculateSumOfDistances(DistancesMatrix& distances);
+    // calculate distances between every pair of vertices with IDs between min and max;
+    // max == 0 means max = vertexCount
+    void calculateDistancesBetweenVerticesBFS(DistancesMatrix& distances, Vertex min = 0, Vertex max = 0);
 
-    Distance calculateSumOfDistancesBFS(); // simple BFS algorithm
-    Distance calculateSumOfDistancesFW(); // Floyd–Warshall algorithm
+    // calculate the sum of distances between every pair of vertices with IDs between min and max,
+    // using precalculated distances; max == 0 means max = vertexCount
+    Distance calculateSumOfDistances(DistancesMatrix& distances, Vertex min = 0, Vertex max = 0);
 
+    // calculate the sum of distances between every pair of vertices, using a simple BFS algorithm
+    Distance calculateSumOfDistancesBFS();
+
+    // calculate the sum of distances between every pair of vertices, using the Floyd-Warshall algorithm
+    Distance calculateSumOfDistancesFW();
+
+    // prints out the graph to stdout, as adjacency lists
     const void print();
 };
