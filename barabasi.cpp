@@ -4,6 +4,7 @@
 
 #include "barabasi.hpp"
 
+
 Ternary Barabasi::toTernary(Vertex v) {
     auto result = Ternary(iterations);
 

@@ -8,6 +8,7 @@
 
 // #define DEBUG
 
+
 void calculateGraph(unsigned int modelIndex, unsigned long modelParameters) {
 #ifdef DEBUG
     printf("calculating for %u, %lu\n", modelIndex, modelParameters);

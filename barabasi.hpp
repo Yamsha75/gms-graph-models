@@ -41,7 +41,7 @@ public:
     // calculate sum of shortest paths between every pair of vertices
     Distance calculateSumOfDistances();
 
-    // print graph, using ternary representation, as a list of vertices and list of edges
+    // print graph, using ternary representation, as a list of vertices and a list of edges
     // for use with https://csacademy.com/app/graph_editor/
     void print(); 
 };
