@@ -5,7 +5,7 @@
 #include "barabasi.hpp"
 
 
-Ternary Barabasi::toTernary(Vertex v) {
+Ternary Barabasi::toTernary(Vertex v) const {
     auto result = Ternary(iterations);
 
     for (size_t i = iterations; i > 0; i--) {
@@ -15,18 +15,6 @@ Ternary Barabasi::toTernary(Vertex v) {
 
     return result;
 }
-
-// const Vertex Barabasi::toDecimal(Ternary t, size_t skipDigits) {
-//     Vertex result = 0;
-
-//     Vertex m = 1; // multiplier; used instead of math pow
-//     for (size_t i = iterations; i > skipDigits; i--) {
-//         result += m * t[i - 1];
-//         m *= 3;
-//     }
-
-//     return result;
-// }
 
 Barabasi::Barabasi(size_t iterations) : iterations(iterations), graph((Vertex)pow(3.0f, (float)iterations)) {
     // step 0
@@ -39,10 +27,10 @@ Barabasi::Barabasi(size_t iterations) : iterations(iterations), graph((Vertex)po
 
     // further steps
     for (unsigned short int step = 2; step <= iterations; step++) {
-        Graph gc = Graph(graph, graph.vertexCount); // copy of graph
+        ALGraph gc = ALGraph(graph, graph.vertexCount); // copy of graph
 
         for (unsigned int _ = 0; _ < 2; _++) {
-            Vertex offset = graph.mergeGraph(gc);
+            Vertex offset = graph.merge(gc);
 
             for (auto const& v : gc.edges[0])
                 if (gc.edges[v].size() == step - 1)
@@ -57,9 +45,7 @@ Barabasi::Barabasi(size_t iterations) : iterations(iterations), graph((Vertex)po
         ternaryVertices[v] = toTernary(v);
 }
 
-Barabasi::~Barabasi() {}
-
-Distance Barabasi::calculateDistanceToRoot(Vertex v) {
+Distance Barabasi::calculateDistanceToRoot(Vertex v) const {
     Distance result = 0;
     bool zero = true;
 
@@ -72,7 +58,7 @@ Distance Barabasi::calculateDistanceToRoot(Vertex v) {
     return result;
 }
 
-Distance Barabasi::calculateDistanceBetweenVertices(Vertex a, Vertex b) {
+Distance Barabasi::calculateDistanceBetweenVertices(Vertex a, Vertex b) const {
     size_t i = 0;
 
     Ternary ta = ternaryVertices[a];
@@ -104,12 +90,12 @@ Distance Barabasi::calculateDistanceBetweenVertices(Vertex a, Vertex b) {
     return result;
 }
 
-void Barabasi::calculateDistancesFromRoot(DistancesMatrix& distances, Vertex min, Vertex max) {
+void Barabasi::calculateDistancesFromRoot(DistancesMatrix& distances, Vertex min, Vertex max) const {
     for (Vertex v = min; v < max; v++)
         distances[0][v] = calculateDistanceToRoot(v);
 }
 
-Distance Barabasi::calculateSumOfDistances() {
+Distance Barabasi::calculateSumOfShortestDistances() const {
     if (iterations == 0)
         return 0;
 
@@ -138,7 +124,7 @@ Distance Barabasi::calculateSumOfDistances() {
         sum00 += distances[0][a];
 
     // sum of shortest distances between pairs of vertices with oldest base3 digit == 0, except root
-    Distance sum01 = graph.calculateSumOfDistances(distances, 1, third);
+    Distance sum01 = graph.calculateSumOfShortestDistances(distances, 1, third);
 
     // sum of shortest distances between root and every vertex with oldest base3 digit == 1
     Distance sum10 = 0;
@@ -148,7 +134,7 @@ Distance Barabasi::calculateSumOfDistances() {
     return (sum00 + sum01) * 3 + (sum00 + 2 * sum10) * 2 * third;
 }
 
-void Barabasi::print() {
+const void Barabasi::printGraph() const {
     // print all vertices ternary representations in double quotes
     for (Vertex v = 0; v < graph.vertexCount; v++) {
         printf("\"");
@@ -160,13 +146,16 @@ void Barabasi::print() {
 
     // print all edges, using ternary vertices representations in double quotes
     for (Vertex v = 0; v < graph.vertexCount; v++)
-        for (Vertex n : graph.edges[v]) {
-            printf("\"");
-            for (auto const& d : ternaryVertices[v])
-                printf("%hu", d);
-            printf("\" \"");
-            for (auto const& d : ternaryVertices[n])
-                printf("%hu", d);
-            printf("\"\n");
-        }
+        for (const Vertex& n : graph.edges[v])
+            if (n > v) {
+                printf("\"");
+                for (auto const& d : ternaryVertices[v])
+                    printf("%hu", d);
+
+                printf("\" \"");
+                for (auto const& d : ternaryVertices[n])
+                    printf("%hu", d);
+
+                printf("\"\n");
+            }
 }

@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "graph.hpp"
+#include "al_graph.hpp"
 
 
 #define BARABASI 0
@@ -13,35 +14,30 @@ typedef std::vector<unsigned short int> Ternary;
 
 class Barabasi {
 private:
-    Graph graph;
-    size_t iterations;
+    const size_t iterations;
     std::vector<Ternary> ternaryVertices;
 
-public:
     // return vertex ID in ternary
-    Ternary toTernary(Vertex v);
-
-    // return vertex ID from ternary
-    // const Vertex toDecimal(Ternary t, size_t skipDigits = 0);
-
-    Barabasi(size_t iterations);
-
-    ~Barabasi();
+    Ternary toTernary(Vertex v) const;
 
     // calculate distance from vertex v to root, using ternary representation
-    Distance calculateDistanceToRoot(Vertex v);
+    Distance calculateDistanceToRoot(Vertex v) const;
 
     // calculate distance between vertices a and b, using ternary representation
-    Distance calculateDistanceBetweenVertices(Vertex a, Vertex b);
+    Distance calculateDistanceBetweenVertices(Vertex a, Vertex b) const;
 
     // calculate distances between root and vertices with min <= ID < max, using ternary
     // representation, and save to distances matrix
-    void calculateDistancesFromRoot(DistancesMatrix& distances, Vertex min, Vertex max);
+    void calculateDistancesFromRoot(DistancesMatrix& distances, Vertex min, Vertex max) const;
+
+public:
+    ALGraph graph;
+
+    Barabasi(size_t iterations);
 
     // calculate sum of shortest paths between every pair of vertices
-    Distance calculateSumOfDistances();
+    Distance calculateSumOfShortestDistances() const;
 
-    // print graph, using ternary representation, as a list of vertices and a list of edges
-    // for use with https://csacademy.com/app/graph_editor/
-    void print(); 
+    // print graph as a list of vertices and a list of edges, using ternary representation, for use with https://csacademy.com/app/graph_editor/
+    const void printGraph() const;
 };

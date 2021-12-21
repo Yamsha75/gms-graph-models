@@ -1,65 +1,50 @@
 #pragma once
 
 #include <limits>
-#include <set>
 #include <vector>
 
 
-typedef size_t Vertex;
-typedef std::set<Vertex> Neighbours;
-typedef std::vector<Neighbours> Edges;
+typedef unsigned int Vertex;
+typedef unsigned int Distance;
 
-typedef unsigned long int Distance;
 typedef std::vector<std::vector<Distance>> DistancesMatrix;
 
 
 class Graph {
 public:
-    static const Distance inf = std::numeric_limits<Distance>::max() / 2;
-
     Vertex maxVertexCount;
     Vertex vertexCount = 0;
-    Edges edges;
 
-    Graph(Vertex maxVertexCount);
+    static const Distance inf = std::numeric_limits<Distance>::max() / 2;
 
-    // copy constructor
-    Graph(const Graph& o, Vertex maxVertexCount = 0);
+    Graph(Vertex maxVertexCount) : maxVertexCount(maxVertexCount) {};
 
-    ~Graph();
+    ~Graph() {};
 
-    // add a new vertex without any edges; returns new vertex ID
     Vertex addVertex();
 
-    // add a new vertex with preexisint edges; returns new vertex ID
-    Vertex addVertex(const Neighbours& neighbours);
+    virtual void addEdge(Vertex a, Vertex b) = 0;
 
-    // add a new edge between existing edges
-    void addEdge(Vertex a, Vertex b);
+    virtual bool areVerticesNeighbours(Vertex a, Vertex b) const = 0;
 
-    // adds other graph to this, with no edges between; effectively two disjointed graphs
-    Vertex mergeGraph(const Graph& o);
+    // calculate shortest distances between vertex s and every other vertex between min and max using BFS algorithm; max == 0 means max == vertexCount
+    virtual void calculateShortestDistancesFromVertexBFS(DistancesMatrix& distances, Vertex s = 0, Vertex min = 0, Vertex max = 0) const = 0;
 
-    bool areVerticesNeighbours(Vertex a, Vertex b);
+    // calculate shortest distances between every pair of vertices between min and max using BFS algorithm; max == 0 means max == vertexCount
+    void calculateShortestDistancesBetweenVerticesBFS(DistancesMatrix& distances, Vertex min = 0, Vertex max = 0) const;
 
-    // calculate distances between vertex s and every other with ID between min and max;
-    // max == 0 means max = vertexCount
-    void calculateDistancesFromVertexBFS(DistancesMatrix& distances, Vertex s = 0, Vertex min = 0, Vertex max = 0);
+    // calculate the sum of shortest distances between every pair of vertices between min and max, using precalculated distances matrix; max == 0 means max == vertexCount
+    Distance calculateSumOfShortestDistances(DistancesMatrix& distances, Vertex min = 0, Vertex max = 0) const;
 
-    // calculate distances between every pair of vertices with IDs between min and max;
-    // max == 0 means max = vertexCount
-    void calculateDistancesBetweenVerticesBFS(DistancesMatrix& distances, Vertex min = 0, Vertex max = 0);
+    // calculate the sum of shortest distances in graph using BFS algorithm
+    virtual Distance getSumOfShortestDistancesBFS() const = 0;
 
-    // calculate the sum of distances between every pair of vertices with IDs between min and max,
-    // using precalculated distances; max == 0 means max = vertexCount
-    Distance calculateSumOfDistances(DistancesMatrix& distances, Vertex min = 0, Vertex max = 0);
-
-    // calculate the sum of distances between every pair of vertices, using a simple BFS algorithm
-    Distance calculateSumOfDistancesBFS();
-
-    // calculate the sum of distances between every pair of vertices, using the Floyd-Warshall algorithm
-    Distance calculateSumOfDistancesFW();
+    // calculate the sum of shortest distances in graph using Floyd-Warshall algorithm
+    Distance getSumOfShortestDistancesFW() const;
 
     // prints out the graph to stdout, as adjacency lists
-    const void print();
+    virtual const void printAdjacencyList() const = 0;
+
+    // print graph as a list of vertices and a list of edges, for use with https://csacademy.com/app/graph_editor/
+    virtual const void printGraph() const = 0;
 };

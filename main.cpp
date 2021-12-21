@@ -5,6 +5,8 @@
 #include <iterator>
 
 #include "barabasi.hpp"
+#include "lusuguo.hpp"
+
 
 // #define DEBUG
 
@@ -18,7 +20,16 @@ void calculateGraph(unsigned int modelIndex, unsigned long modelParameters) {
     case BARABASI: {
         Barabasi b = Barabasi(modelParameters);
 
-        printf("%lu\n", b.calculateSumOfDistances());
+        // b.printGraph();
+        printf("%u\n", b.calculateSumOfShortestDistances());
+
+        break;
+    }
+    case LUSUGUO: {
+        LuSuGuo l = LuSuGuo(modelParameters);
+
+        // l.graph.printGraph();
+        printf("%u\n", l.calculateSumOfShortestDistances());
 
         break;
     }
