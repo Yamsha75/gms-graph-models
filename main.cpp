@@ -4,6 +4,7 @@
 #include <string>
 #include <iterator>
 
+#include "model.hpp"
 #include "barabasi.hpp"
 #include "lusuguo.hpp"
 
@@ -16,27 +17,24 @@ void calculateGraph(unsigned int modelIndex, unsigned long modelParameters) {
     printf("calculating for %u, %lu\n", modelIndex, modelParameters);
 #endif
 
+    Model* m;
+
     switch (modelIndex) {
-    case BARABASI: {
-        Barabasi b = Barabasi(modelParameters);
-
-        // b.printGraph();
-        printf("%u\n", b.calculateSumOfShortestDistances());
-
+    case BARABASI:
+        m = new Barabasi(modelParameters);
         break;
-    }
     case LUSUGUO: {
-        LuSuGuo l = LuSuGuo(modelParameters);
-
-        // l.graph.printGraph();
-        printf("%u\n", l.calculateSumOfShortestDistances());
-
+        m = new LuSuGuo(modelParameters);
         break;
     }
     default:
         printf("-1\n");
         return;
     }
+
+    // printf("%u\n", m->calculate());
+
+    delete m;
 }
 
 int main(int argc, char* argv[]) {

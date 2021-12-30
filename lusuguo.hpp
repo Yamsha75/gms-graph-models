@@ -1,18 +1,14 @@
 #pragma once
 
-#include "graph.hpp"
-#include "am_graph.hpp"
-
-
 #define LUSUGUO 1
 
+#include "model.hpp"
+#include "graph.hpp"
 
-class LuSuGuo {
+
+class LuSuGuo : public Model {
 public:
-    AMGraph graph;
+    LuSuGuo(size_t vertexCount);
 
-    LuSuGuo(Vertex vertexCount);
-
-    // calculate the sum of shortest distances in graph
-    Distance calculateSumOfShortestDistances() const;
+    unsigned int calculate() const override;
 };

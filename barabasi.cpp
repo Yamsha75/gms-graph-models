@@ -1,55 +1,63 @@
 #include <stdio.h>
-#include <math.h>
 #include <queue>
 
 #include "barabasi.hpp"
 
 
-Ternary Barabasi::toTernary(Vertex v) const {
-    auto result = Ternary(iterations);
+Barabasi::Barabasi(size_t iterations, size_t vertexCount) : Model(vertexCount), iterations(iterations), ternary(vertexCount) {
+    // step 0
+    graph.addVertex();
 
-    for (size_t i = iterations; i > 0; i--) {
-        result[i - 1] = v % 3;
+    // step 1
+    if (iterations >= 1) {
+        graph.addVertex({ 0 });
+        graph.addVertex({ 0 });
+    }
+
+    // further steps
+    for (unsigned short int step = 2; step <= iterations; step++) {
+        Graph gc = Graph(graph);
+
+        size_t limit = gc.len();
+
+        for (unsigned int _ = 0; _ < 2; _++) {
+            size_t offset = graph.merge(gc);
+
+            for (size_t v = 1; v < limit; v++) {
+                if (gc.areVerticesNeighbours(0, v)) {
+                    size_t degree = 0;
+
+                    for (size_t n = 0; n < limit; n++)
+                        if (gc.areVerticesNeighbours(v, n))
+                            degree++;
+
+                    if (degree == step - 1)
+                        graph.addEdge(0, v + offset);
+                }
+            }
+        }
+    }
+
+    for (size_t v = 0; v < vertexCount; v++)
+        ternary[v] = toTernary(v);
+}
+
+Barabasi::Ternary Barabasi::toTernary(size_t v) const {
+    Ternary result = Ternary(iterations);
+
+    for (size_t i = iterations - 1; i < iterations; i--) {
+        result[i] = v % 3;
         v /= 3;
     }
 
     return result;
 }
 
-Barabasi::Barabasi(size_t iterations) : iterations(iterations), graph((Vertex)pow(3.0f, (float)iterations)) {
-    // step 0
-    graph.addVertex();
-
-    // step 1
-    if (iterations >= 1)
-        for (unsigned short int _ = 0; _ < 2; _++)
-            graph.addVertex({ 0 });
-
-    // further steps
-    for (unsigned short int step = 2; step <= iterations; step++) {
-        ALGraph gc = ALGraph(graph, graph.vertexCount); // copy of graph
-
-        for (unsigned int _ = 0; _ < 2; _++) {
-            Vertex offset = graph.merge(gc);
-
-            for (auto const& v : gc.edges[0])
-                if (gc.edges[v].size() == step - 1)
-                    graph.addEdge(0, v + offset);
-        }
-    }
-
-    // calculate ternary values for each vertex
-    ternaryVertices = std::vector<Ternary>(graph.vertexCount);
-
-    for (Vertex v = 0; v < graph.vertexCount; v++)
-        ternaryVertices[v] = toTernary(v);
-}
-
-Distance Barabasi::calculateDistanceToRoot(Vertex v) const {
-    Distance result = 0;
+unsigned int Barabasi::calculateDistanceToRoot(size_t v) const {
+    unsigned int result = 0;
     bool zero = true;
 
-    for (auto const& d : ternaryVertices[v])
+    for (auto const& d : ternary[v])
         if (d == 0 != zero) {
             result++;
             zero = not zero;
@@ -58,104 +66,70 @@ Distance Barabasi::calculateDistanceToRoot(Vertex v) const {
     return result;
 }
 
-Distance Barabasi::calculateDistanceBetweenVertices(Vertex a, Vertex b) const {
+unsigned int Barabasi::calculateAllDistancesToRoot(size_t min, size_t max) const {
+    unsigned int result = 0;
+
+    for (size_t v = min; v < max; v++)
+        result += calculateDistanceToRoot(v);
+
+    return result;
+}
+
+unsigned int Barabasi::calculateDistanceBetweenVertices(size_t a, size_t b) const {
     size_t i = 0;
 
-    Ternary ta = ternaryVertices[a];
-    Ternary tb = ternaryVertices[b];
+    Ternary ta = ternary[a];
+    Ternary tb = ternary[b];
 
-    while (ta[i] == tb[i]) {
-        i++;
-    }
+    for (; i < iterations; i++)
+        if (ta[i] != tb[i])
+            break;
 
-    Distance result = 0;
-    bool zero = true;
+    unsigned int result = 0;
+    bool azero = true;
+    bool bzero = true;
 
     for (size_t j = i; j < iterations; j++) {
-        if (ta[j] == 0 != zero) {
+        if (ta[j] == 0 != azero) {
             result++;
-            zero = not zero;
+            azero = not azero;
         }
-    }
-
-    zero = true;
-
-    for (size_t j = i; j < iterations; j++) {
-        if (tb[j] == 0 != zero) {
+        if (tb[j] == 0 != bzero) {
             result++;
-            zero = not zero;
+            bzero = not bzero;
         }
     }
 
     return result;
 }
 
-void Barabasi::calculateDistancesFromRoot(DistancesMatrix& distances, Vertex min, Vertex max) const {
-    for (Vertex v = min; v < max; v++)
-        distances[0][v] = calculateDistanceToRoot(v);
+unsigned int Barabasi::calculateAllDistancesBetweenVertices(size_t min, size_t max) const {
+    unsigned int result = 0;
+
+    for (size_t a = min; a < max; a++)
+        for (size_t b = a + 1; b < max; b++)
+            result += calculateDistanceBetweenVertices(a, b);
+
+    return result;
 }
 
-Distance Barabasi::calculateSumOfShortestDistances() const {
+unsigned int Barabasi::calculate() const {
     if (iterations == 0)
         return 0;
 
     if (iterations == 1)
         return 2;
 
-    Vertex third = graph.vertexCount / 3;
-
-    // init a map with distances between every possible pair of vertices
-    DistancesMatrix distances = DistancesMatrix(graph.vertexCount);
-
-    for (Vertex a = 0; a < graph.vertexCount; a++)
-        distances[a] = std::vector<Distance>(graph.vertexCount);
-
-    // calculate shortest distances between every vertex with oldest base3 digit == 0
-    for (Vertex a = 0; a < third; a++)
-        for (Vertex b = a + 1; b < third; b++)
-            distances[a][b] = calculateDistanceBetweenVertices(a, b);
-
-    // calculate shortest distances from root to each vertex with oldest base3 digit == 1
-    calculateDistancesFromRoot(distances, third, third * 2);
+    size_t third = graph.len() / 3;
 
     // sum of shortest distances between root and every vertex with oldest base3 digit == 0
-    Distance sum00 = 0;
-    for (Vertex a = 1; a < third; a++)
-        sum00 += distances[0][a];
+    unsigned int sum00 = calculateAllDistancesToRoot(1, third);
 
     // sum of shortest distances between pairs of vertices with oldest base3 digit == 0, except root
-    Distance sum01 = graph.calculateSumOfShortestDistances(distances, 1, third);
+    unsigned int sum01 = calculateAllDistancesBetweenVertices(1, third);
 
     // sum of shortest distances between root and every vertex with oldest base3 digit == 1
-    Distance sum10 = 0;
-    for (Vertex a = third; a < third * 2; a++)
-        sum10 += distances[0][a];
+    unsigned int sum10 = calculateAllDistancesToRoot(third, third * 2);
 
-    return (sum00 + sum01) * 3 + (sum00 + 2 * sum10) * 2 * third;
-}
-
-const void Barabasi::printGraph() const {
-    // print all vertices ternary representations in double quotes
-    for (Vertex v = 0; v < graph.vertexCount; v++) {
-        printf("\"");
-        for (auto const& d : ternaryVertices[v]) {
-            printf("%hu", d);
-        }
-        printf("\"\n");
-    }
-
-    // print all edges, using ternary vertices representations in double quotes
-    for (Vertex v = 0; v < graph.vertexCount; v++)
-        for (const Vertex& n : graph.edges[v])
-            if (n > v) {
-                printf("\"");
-                for (auto const& d : ternaryVertices[v])
-                    printf("%hu", d);
-
-                printf("\" \"");
-                for (auto const& d : ternaryVertices[n])
-                    printf("%hu", d);
-
-                printf("\"\n");
-            }
+    return (sum00 + sum01) * 3 + (sum00 + 2 * sum10) * third * 2;
 }

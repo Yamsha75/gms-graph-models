@@ -59,7 +59,7 @@
 //     }
 // }
 
-LuSuGuo::LuSuGuo(Vertex vertexCount) : graph(vertexCount) {
+LuSuGuo::LuSuGuo(size_t vertexCount) : Model(vertexCount) {
     graph.addVertex();
 
     for (unsigned long int id = 1; id < vertexCount; id++) {
@@ -78,6 +78,6 @@ LuSuGuo::LuSuGuo(Vertex vertexCount) : graph(vertexCount) {
     }
 }
 
-Distance LuSuGuo::calculateSumOfShortestDistances() const {
-    return graph.getSumOfShortestDistancesBFS();
+unsigned int LuSuGuo::calculate() const {
+    return graph.calculateBFS();
 }

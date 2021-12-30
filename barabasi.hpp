@@ -1,43 +1,33 @@
 #pragma once
 
-#include <vector>
-
-#include "graph.hpp"
-#include "al_graph.hpp"
-
-
 #define BARABASI 0
 
-// vector of ternary (base3) digits
-typedef std::vector<unsigned short int> Ternary;
+#include <math.h>
+#include <vector>
+
+#include "model.hpp"
+#include "graph.hpp"
 
 
-class Barabasi {
+
+class Barabasi : public Model {
+    typedef std::vector<unsigned short int> Ternary;
+
 private:
     const size_t iterations;
-    std::vector<Ternary> ternaryVertices;
+    std::vector<Ternary> ternary;
 
-    // return vertex ID in ternary
-    Ternary toTernary(Vertex v) const;
+    Barabasi(size_t iterations, size_t vertexCount);
 
-    // calculate distance from vertex v to root, using ternary representation
-    Distance calculateDistanceToRoot(Vertex v) const;
+    Ternary toTernary(size_t v) const;
 
-    // calculate distance between vertices a and b, using ternary representation
-    Distance calculateDistanceBetweenVertices(Vertex a, Vertex b) const;
-
-    // calculate distances between root and vertices with min <= ID < max, using ternary
-    // representation, and save to distances matrix
-    void calculateDistancesFromRoot(DistancesMatrix& distances, Vertex min, Vertex max) const;
+    unsigned int calculateDistanceToRoot(size_t v) const;
+    unsigned int calculateAllDistancesToRoot(size_t min, size_t max) const;
+    unsigned int calculateDistanceBetweenVertices(size_t a, size_t b) const;
+    unsigned int calculateAllDistancesBetweenVertices(size_t min, size_t max) const;
 
 public:
-    ALGraph graph;
+    Barabasi(size_t iterations) : Barabasi(iterations, (size_t)pow(3.0f, (float)iterations)) {};
 
-    Barabasi(size_t iterations);
-
-    // calculate sum of shortest paths between every pair of vertices
-    Distance calculateSumOfShortestDistances() const;
-
-    // print graph as a list of vertices and a list of edges, using ternary representation, for use with https://csacademy.com/app/graph_editor/
-    const void printGraph() const;
+    unsigned int calculate() const override;
 };
