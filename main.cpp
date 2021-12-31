@@ -32,7 +32,7 @@ void calculateGraph(unsigned int modelIndex, unsigned long modelParameters) {
         return;
     }
 
-    // printf("%u\n", m->calculate());
+    printf("%u\n", m->calculate());
 
     delete m;
 }

@@ -1,13 +1,16 @@
 #pragma once
 
+#include <list>
 #include <vector>
 
 
 class Graph {
+    typedef std::list<size_t> Neighbours;
+
 private:
     size_t size;
     size_t vertexCount = 0;
-    bool** edges;
+    Neighbours* edges;
 
 public:
     Graph(size_t size);
@@ -23,6 +26,7 @@ public:
     void addEdge(size_t a, size_t b);
 
     bool areVerticesNeighbours(size_t a, size_t b) const;
+    const Neighbours getVertexNeighbours(size_t v) const;
 
     size_t merge(const Graph& other);
 

@@ -18,27 +18,20 @@ Barabasi::Barabasi(size_t iterations, size_t vertexCount) : Model(vertexCount), 
     for (unsigned short int step = 2; step <= iterations; step++) {
         Graph gc = Graph(graph);
 
-        size_t limit = gc.len();
-
         for (unsigned int _ = 0; _ < 2; _++) {
             size_t offset = graph.merge(gc);
 
-            for (size_t v = 1; v < limit; v++) {
-                if (gc.areVerticesNeighbours(0, v)) {
-                    size_t degree = 0;
-
-                    for (size_t n = 0; n < limit; n++)
-                        if (gc.areVerticesNeighbours(v, n))
-                            degree++;
-
-                    if (degree == step - 1)
-                        graph.addEdge(0, v + offset);
-                }
-            }
+            for (auto const& v : gc.getVertexNeighbours(0))
+                if (gc.getVertexNeighbours(v).size() == step - 1)
+                    graph.addEdge(0, v + offset);
         }
     }
 
-    for (size_t v = 0; v < vertexCount; v++)
+    // precalculate base3 representation for vertex ids, skipping those with oldest base3 digit == 2
+    // (last third of vertices)
+    size_t max = vertexCount / 3 * 2;
+
+    for (size_t v = 0; v < max; v++)
         ternary[v] = toTernary(v);
 }
 

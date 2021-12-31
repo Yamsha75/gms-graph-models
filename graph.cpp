@@ -8,27 +8,20 @@
 Graph::Graph(size_t size) {
     this->size = size;
 
-    edges = new bool* [size];
-
-    for (size_t i = 0; i < size; i++)
-        edges[i] = new bool[size]();
+    edges = new Neighbours[size]();
 }
 
 Graph::Graph(const Graph& other) : Graph(other.vertexCount) {
     vertexCount = other.vertexCount;
 
     for (size_t a = 0; a < vertexCount; a++)
-        for (size_t b = a + 1; b < vertexCount; b++)
-            if (other.edges[a][b]) {
-                edges[a][b] = true;
-                edges[b][a] = true;
-            }
+        for (auto const& n : other.edges[a]) {
+            edges[a].push_back(n);
+            edges[n].push_back(a);
+        }
 }
 
 Graph::~Graph() {
-    for (size_t i = 0; i < size; i++)
-        delete[] edges[i];
-
     delete[] edges;
 }
 
@@ -40,33 +33,38 @@ size_t Graph::addVertex(const std::vector<size_t>& neighbours) {
     size_t v = vertexCount++;
 
     for (size_t const& n : neighbours) {
-        edges[v][n] = true;
-        edges[n][v] = true;
+        edges[v].push_back(n);
+        edges[n].push_back(v);
     }
 
     return v;
 }
 
 void Graph::addEdge(size_t a, size_t b) {
-    edges[a][b] = true;
-    edges[b][a] = true;
+    edges[a].push_back(b);
+    edges[b].push_back(a);
 }
 
 bool Graph::areVerticesNeighbours(size_t a, size_t b) const {
-    return edges[a][b];
+    for (auto const& n : edges[a])
+        if (n == b)
+            return true;
+
+    return false;
+}
+
+const Graph::Neighbours Graph::getVertexNeighbours(size_t v) const {
+    return edges[v];
 }
 
 size_t Graph::merge(const Graph& other) {
     size_t offset = vertexCount;
 
-    for (size_t a = 0; a < other.vertexCount; a++)
-        for (size_t b = a + 1; b < other.vertexCount; b++)
-            if (other.edges[a][b]) {
-                edges[a + offset][b + offset] = true;
-                edges[b + offset][a + offset] = true;
-            }
-
     vertexCount += other.vertexCount;
+
+    for (size_t v = 0; v < other.vertexCount; v++)
+        for (auto const& n : other.edges[v])
+            addEdge(v + offset, n + offset);
 
     return offset;
 }
@@ -77,43 +75,34 @@ unsigned int Graph::calculateBFS() const {
 
     std::queue<size_t> open = {};
     bool* visited = new bool[vertexCount];
-
-    unsigned int d;
-    size_t a;
+    unsigned int* distances = new unsigned int[vertexCount];
 
     // calculate shortest distances for every pair of vertices
     for (size_t s = 0; s < vertexCount; s++) {
-        std::fill(visited, visited + vertexCount, false);
-
         open.push(s);
-        open.push(vertexCount);
-
-        d = 0;
+        std::fill(visited, visited + vertexCount, false);
+        visited[s] = true;
+        distances[s] = 0;
 
         while (!open.empty()) {
-            a = open.front();
+            size_t v = open.front();
             open.pop();
 
-            if (a == vertexCount) {
-                if (!open.empty()) {
-                    d++;
-                    open.push(vertexCount);
+            for (auto const& n : edges[v])
+                if (!visited[n]) {
+                    open.push(n);
+                    visited[n] = true;
+                    distances[n] = distances[v] + 1;
                 }
-            }
-            else if (!visited[a]) {
-                visited[a] = true;
-
-                sum += d;
-
-                for (size_t b = 0; b < vertexCount; b++)
-                    if (!visited[b] and edges[a][b])
-                        open.push(b);
-            }
         }
+
+        for (size_t v = 0; v < vertexCount; v++)
+            sum += distances[v];
     }
 
     // cleanup
     delete[] visited;
+    delete[] distances;
 
     // return
     return sum / 2;
@@ -128,8 +117,8 @@ unsigned int Graph::calculateFW() const {
     for (size_t v = 0; v < vertexCount; v++)
         distances[v] = new unsigned int[vertexCount]();
 
-    for (size_t a = 0; a < vertexCount; a++) {
-        for (size_t b = a + 1; b < vertexCount; b++) {
+    for (size_t a = 0; a < vertexCount; a++)
+        for (size_t b = a + 1; b < vertexCount; b++)
             if (areVerticesNeighbours(a, b)) {
                 distances[a][b] = 1;
                 distances[b][a] = 1;
@@ -138,8 +127,6 @@ unsigned int Graph::calculateFW() const {
                 distances[a][b] = max;
                 distances[b][a] = max;
             }
-        }
-    }
 
     // calculate shortest distances for every pair of vertices
     for (size_t k = 0; k < vertexCount; k++)
@@ -170,8 +157,7 @@ void Graph::print() const {
     for (size_t v = 0; v < vertexCount; v++)
         printf("%zu\n", v);
 
-    for (size_t a = 0; a < vertexCount; a++)
-        for (size_t b = a + 1; b < vertexCount; b++)
-            if (edges[a][b])
-                printf("%zu %zu\n", a, b);
+    for (size_t v = 0; v < vertexCount; v++)
+        for (auto const& n : edges[v])
+            printf("%zu %zu\n", v, n);
 }
