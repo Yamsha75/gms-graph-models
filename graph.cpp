@@ -5,24 +5,11 @@
 #include "graph.hpp"
 
 
-Graph::Graph(size_t size) {
-    this->size = size;
-
-    edges = new Neighbours[size]();
-}
-
 Graph::Graph(const Graph& other) : Graph(other.vertexCount) {
     vertexCount = other.vertexCount;
 
     for (size_t a = 0; a < vertexCount; a++)
-        for (auto const& n : other.edges[a]) {
-            edges[a].push_back(n);
-            edges[n].push_back(a);
-        }
-}
-
-Graph::~Graph() {
-    delete[] edges;
+        edges[a] = Neighbours(other.edges[a]);
 }
 
 size_t Graph::addVertex() {
@@ -46,7 +33,7 @@ void Graph::addEdge(size_t a, size_t b) {
 }
 
 bool Graph::areVerticesNeighbours(size_t a, size_t b) const {
-    for (auto const& n : edges[a])
+    for (size_t const& n : edges[a])
         if (n == b)
             return true;
 
@@ -63,7 +50,7 @@ size_t Graph::merge(const Graph& other) {
     vertexCount += other.vertexCount;
 
     for (size_t v = 0; v < other.vertexCount; v++)
-        for (auto const& n : other.edges[v])
+        for (size_t const& n : other.edges[v])
             addEdge(v + offset, n + offset);
 
     return offset;
@@ -88,7 +75,7 @@ unsigned int Graph::calculateBFS() const {
             size_t v = open.front();
             open.pop();
 
-            for (auto const& n : edges[v])
+            for (size_t const& n : edges[v])
                 if (!visited[n]) {
                     open.push(n);
                     visited[n] = true;
@@ -158,6 +145,6 @@ void Graph::print() const {
         printf("%zu\n", v);
 
     for (size_t v = 0; v < vertexCount; v++)
-        for (auto const& n : edges[v])
+        for (size_t const& n : edges[v])
             printf("%zu %zu\n", v, n);
 }

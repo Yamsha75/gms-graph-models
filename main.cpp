@@ -23,10 +23,9 @@ void calculateGraph(unsigned int modelIndex, unsigned long modelParameters) {
     case BARABASI:
         m = new Barabasi(modelParameters);
         break;
-    case LUSUGUO: {
+    case LUSUGUO:
         m = new LuSuGuo(modelParameters);
         break;
-    }
     default:
         printf("-1\n");
         return;

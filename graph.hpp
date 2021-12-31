@@ -8,15 +8,12 @@ class Graph {
     typedef std::list<size_t> Neighbours;
 
 private:
-    size_t size;
     size_t vertexCount = 0;
-    Neighbours* edges;
+    std::vector<Neighbours> edges;
 
 public:
-    Graph(size_t size);
+    Graph(size_t size) : edges(size) {};
     Graph(const Graph& other);
-
-    ~Graph();
 
     size_t len() const { return vertexCount; };
 
