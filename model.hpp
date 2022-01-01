@@ -11,4 +11,6 @@ public:
     Model(size_t vertexCount) : graph(vertexCount) {};
 
     virtual unsigned int calculate() const = 0;
+
+    void print() const { graph.print(); };
 };

@@ -51,7 +51,8 @@ size_t Graph::merge(const Graph& other) {
 
     for (size_t v = 0; v < other.vertexCount; v++)
         for (size_t const& n : other.edges[v])
-            addEdge(v + offset, n + offset);
+            if (n > v) // skip doubling edges
+                addEdge(v + offset, n + offset);
 
     return offset;
 }
@@ -75,11 +76,13 @@ unsigned int Graph::calculateBFS() const {
             size_t v = open.front();
             open.pop();
 
+            unsigned int distance = distances[v] + 1;
+
             for (size_t const& n : edges[v])
                 if (!visited[n]) {
                     open.push(n);
                     visited[n] = true;
-                    distances[n] = distances[v] + 1;
+                    distances[n] = distance;
                 }
         }
 
@@ -146,5 +149,6 @@ void Graph::print() const {
 
     for (size_t v = 0; v < vertexCount; v++)
         for (size_t const& n : edges[v])
-            printf("%zu %zu\n", v, n);
+            if (n > v) // skip doubling edges
+                printf("%zu %zu\n", v, n);
 }

@@ -16,7 +16,7 @@ Barabasi::Barabasi(size_t iterations, size_t vertexCount) : Model(vertexCount), 
 
     // further steps
     for (unsigned short int step = 2; step <= iterations; step++) {
-        Graph gc = Graph(graph);
+        const Graph gc = Graph(graph);
 
         for (unsigned int _ = 0; _ < 2; _++) {
             size_t offset = graph.merge(gc);
