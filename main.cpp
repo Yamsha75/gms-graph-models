@@ -8,6 +8,7 @@
 #include "barabasi.hpp"
 #include "lusuguo.hpp"
 #include "growth-iterative.hpp"
+#include "dcn.hpp"
 
 
 void calculateModel(unsigned short int modelIndex, size_t k, size_t r = 0) {
@@ -23,6 +24,9 @@ void calculateModel(unsigned short int modelIndex, size_t k, size_t r = 0) {
     case GROWTH_ITERATIVE:
         m = new GrowthIterative(k, r);
         break;
+    case DCN_:
+        m = new DCN(k);
+        break;
     default:
         printf("-1\n");
         return;
@@ -37,7 +41,7 @@ int main(int argc, char* argv[]) {
     unsigned short int modelIndex;
     size_t k, r;
 
-    while (scanf("%hu", &modelIndex) != EOF) {
+    while (scanf("%hu", &modelIndex) != EOF)
         if (scanf("%zu", &k) != EOF) {
             switch (modelIndex) {
             case GROWTH_ITERATIVE:
@@ -47,7 +51,6 @@ int main(int argc, char* argv[]) {
                 calculateModel(modelIndex, k, r);
             }
         }
-    }
 
     return 0;
 }
