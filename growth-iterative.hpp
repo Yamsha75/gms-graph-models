@@ -4,6 +4,7 @@
 
 #include "model.hpp"
 
+
 class GrowthIterative : public Model {
     typedef std::pair<size_t, size_t> Edge;
 

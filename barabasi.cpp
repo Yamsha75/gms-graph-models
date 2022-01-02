@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <queue>
 
@@ -34,6 +35,8 @@ Barabasi::Barabasi(size_t iterations, size_t vertexCount) : Model(vertexCount), 
     for (size_t v = 0; v < max; v++)
         ternary[v] = toTernary(v);
 }
+
+Barabasi::Barabasi(size_t iterations) : Barabasi(iterations, (size_t)pow(3.0f, (double)iterations)) {};
 
 Barabasi::Ternary Barabasi::toTernary(size_t v) const {
     Ternary result = Ternary(iterations);

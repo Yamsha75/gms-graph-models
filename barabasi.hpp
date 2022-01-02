@@ -2,12 +2,9 @@
 
 #define BARABASI 0
 
-#include <math.h>
 #include <vector>
 
 #include "model.hpp"
-#include "graph.hpp"
-
 
 
 class Barabasi : public Model {
@@ -27,7 +24,7 @@ private:
     unsigned int calculateAllDistancesBetweenVertices(size_t min, size_t max) const;
 
 public:
-    Barabasi(size_t iterations) : Barabasi(iterations, (size_t)pow(3.0f, (float)iterations)) {};
+    Barabasi(size_t iterations);
 
     unsigned int calculate() const override;
 };
