@@ -7,24 +7,21 @@
 #include "model.hpp"
 #include "barabasi.hpp"
 #include "lusuguo.hpp"
+#include "growth-iterative.hpp"
 
 
-// #define DEBUG
-
-
-void calculateGraph(unsigned int modelIndex, unsigned long modelParameters) {
-#ifdef DEBUG
-    printf("calculating for %u, %lu\n", modelIndex, modelParameters);
-#endif
-
+void calculateModel(unsigned short int modelIndex, size_t k, size_t r = 0) {
     Model* m;
 
     switch (modelIndex) {
     case BARABASI:
-        m = new Barabasi(modelParameters);
+        m = new Barabasi(k);
         break;
     case LUSUGUO:
-        m = new LuSuGuo(modelParameters);
+        m = new LuSuGuo(k);
+        break;
+    case GROWTH_ITERATIVE:
+        m = new GrowthIterative(k, r);
         break;
     default:
         printf("-1\n");
@@ -37,29 +34,19 @@ void calculateGraph(unsigned int modelIndex, unsigned long modelParameters) {
 }
 
 int main(int argc, char* argv[]) {
-    unsigned int modelIndex;
-    unsigned long modelParameters;
+    unsigned short int modelIndex;
+    size_t k, r;
 
-    if (argc > 1) {
-        // parameters given with program execution
-        if (argc % 2 == 1) {
-            for (unsigned int i = 1; i < argc; i += 2) {
-                if (sscanf(argv[i], "%u", &modelIndex) == 1 and sscanf(argv[i + 1], "%lu", &modelParameters) == 1)
-                    calculateGraph(modelIndex, modelParameters);
-                else {
-                    printf("unexpected argument pair: %s %s! must be two non-negative integers!\n", argv[i], argv[i + 1]);
-                }
+    while (scanf("%hu", &modelIndex) != EOF) {
+        if (scanf("%zu", &k) != EOF) {
+            switch (modelIndex) {
+            case GROWTH_ITERATIVE:
+                if (scanf("%zu", &r) == EOF)
+                    continue;
+            default:
+                calculateModel(modelIndex, k, r);
             }
         }
-        else {
-            printf("unexpected number of arguments: %d! must be an even number!\n", argc);
-            return 1;
-        }
-    }
-    else {
-        // await parameters from stdin
-        while (scanf("%u %lu", &modelIndex, &modelParameters) == 2)
-            calculateGraph(modelIndex, modelParameters);
     }
 
     return 0;
