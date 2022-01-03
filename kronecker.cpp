@@ -10,10 +10,9 @@ Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t base
         graph.addVertex();
 
     for (size_t a = 0; a < baseVertexCount; a++)
-        for (size_t b = a + 1; b < baseVertexCount; b++) {
+        for (size_t b = a + 1; b < baseVertexCount; b++)
             if (adjacencyMatrix[a * baseVertexCount + b] == '1')
                 graph.addEdge(a, b);
-        }
 
     // apply strong product <iterations - 1> times
     Graph H = Graph(graph);
@@ -32,7 +31,7 @@ Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t base
         for (size_t x = 0; x < graph.len(); x++)
             for (size_t y = x + 1; y < graph.len(); y++) {
                 if (graph.areVerticesNeighbours(x, y))
-                    // vertices u and v are already connected
+                    // vertices x and y are already connected
                     continue;
 
                 size_t x1 = x % gCount;
