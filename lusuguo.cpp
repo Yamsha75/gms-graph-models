@@ -66,15 +66,13 @@ LuSuGuo::LuSuGuo(size_t vertexCount) : Model(vertexCount) {
         int l = (int)std::floor(std::log2(id + 1));
         graph.addVertex();
 
-        if (l > 1) {
+        if (l > 1)
             graph.addEdge(id, (size_t)std::floor((id - 1) / 2) % (l - 1));
-        }
 
         graph.addEdge(id, (size_t)std::floor((id + 1) / 2) - 1);
 
-        if (id % 2 == 0) {
+        if (id % 2 == 0)
             graph.addEdge(id, id - 1);
-        }
     }
 }
 
