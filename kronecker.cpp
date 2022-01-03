@@ -54,5 +54,5 @@ Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t base
 Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix) : Kronecker(iterations, adjacencyMatrix, (size_t)sqrt((double)strlen(adjacencyMatrix))) {};
 
 unsigned int Kronecker::calculate() const {
-    return graph.calculateBFS();
+    return graph.calculateFW();
 }
