@@ -1,27 +1,27 @@
 #/bin/bash
 
-if [ $# -lt 1 ]; then
-    echo "No test case supplied"
-    exit 1
+if [ $# -eq 0 ]; then
+    TESTS="0 1 2 3 4"
+else
+    TESTS="$*"
 fi
 
 TEMP=".tmp"
 
-for TEST in "$@"; do
+for TEST in $TESTS; do
     FILE="tests/${TEST}.in"
 
-    echo -n > $TEMP
-
     if [ -f $FILE ]; then
-        while read LINE; do
-            echo $LINE
-            time ./gms <<< $LINE >> $TEMP
-        done < $FILE
+        echo -n > $TEMP
+
+        echo "Testing $TEST..."
+
+        time ./gms < $FILE >> $TEMP
+
+        diff "tests/${TEST}.out" $TEMP
     else
         echo "Test $TEST not found!"
     fi
-
-    diff "tests/${TEST}.out" $TEMP
 done
 
 rm $TEMP
