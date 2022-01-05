@@ -1,8 +1,5 @@
-#include <stdio.h>
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <iterator>
+#include <cstdio>
+#include <cstring>
 
 #include "model.hpp"
 #include "barabasi.hpp"

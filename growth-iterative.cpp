@@ -1,9 +1,7 @@
 #include <algorithm>
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
 
 #include "growth-iterative.hpp"
-
 
 
 GrowthIterative::GrowthIterative(size_t iterations, size_t newVertices, size_t vertexCount) : Model(vertexCount) {
@@ -58,7 +56,8 @@ GrowthIterative::GrowthIterative(size_t iterations, size_t newVertices, size_t v
             sumOfShortestDistances += distances[a][b];
 }
 
-GrowthIterative::GrowthIterative(size_t iterations, size_t newVertices) : GrowthIterative(iterations, newVertices, calculateNumberOfVertices(iterations, newVertices)) {};
+GrowthIterative::GrowthIterative(size_t iterations, size_t newVertices)
+    : GrowthIterative(iterations, newVertices, calculateNumberOfVertices(iterations, newVertices)) {};
 
 size_t GrowthIterative::calculateNumberOfVertices(size_t k, size_t r) {
     return (r * (3 + (size_t)pow(2.0 * (double)r, (double)k)) - 2) / (2 * r - 1);

@@ -1,6 +1,6 @@
 #include <algorithm>
+#include <cstdio>
 #include <queue>
-#include <stdio.h>
 
 #include "graph.hpp"
 

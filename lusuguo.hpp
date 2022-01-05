@@ -3,7 +3,6 @@
 #define LUSUGUO 1
 
 #include "model.hpp"
-#include "graph.hpp"
 
 
 class LuSuGuo : public Model {

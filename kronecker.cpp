@@ -1,11 +1,13 @@
 #include <algorithm>
-#include <string.h>
-#include <math.h>
+#include <cmath>
+#include <cstring>
 
 #include "kronecker.hpp"
 
 
-Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t baseVertexCount) : Model((size_t)pow((double)baseVertexCount, (double)iterations)), baseVertexCount(baseVertexCount) {
+Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t baseVertexCount)
+    : Model((size_t)pow((double)baseVertexCount, (double)iterations)), baseVertexCount(baseVertexCount)
+{
     // recreate base graph from given adjacency matrix
     for (size_t v = 0; v < baseVertexCount; v++)
         graph.addVertex();
@@ -32,8 +34,6 @@ Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t base
         for (size_t n = 1; n < hCount; n++)
             graph.merge(G);
 
-        size_t vertexCount = graph.len();
-
         for (size_t x2 = 0; x2 < hCount; x2++)
             for (size_t y2 = x2 + 1; y2 < hCount; y2++)
                 if (H.areVerticesNeighbours(x2, y2)) {
@@ -58,7 +58,8 @@ Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t base
 }
 
 
-Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix) : Kronecker(iterations, adjacencyMatrix, (size_t)sqrt((double)strlen(adjacencyMatrix))) {};
+Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix)
+    : Kronecker(iterations, adjacencyMatrix, (size_t)sqrt((double)strlen(adjacencyMatrix))) {};
 
 unsigned int Kronecker::calculate() const {
     return graph.calculateFW();
