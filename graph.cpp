@@ -104,19 +104,20 @@ unsigned int Graph::calculateFW() const {
 
     unsigned int** distances = new unsigned int* [vertexCount];
 
-    for (size_t v = 0; v < vertexCount; v++)
-        distances[v] = new unsigned int[vertexCount]();
+    for (size_t v = 0; v < vertexCount; v++) {
+        unsigned int* temp = new unsigned int[vertexCount];
 
-    for (size_t a = 0; a < vertexCount; a++)
-        for (size_t b = a + 1; b < vertexCount; b++)
-            if (areVerticesNeighbours(a, b)) {
-                distances[a][b] = 1;
-                distances[b][a] = 1;
-            }
-            else {
-                distances[a][b] = max;
-                distances[b][a] = max;
-            }
+        distances[v] = temp;
+
+        std::fill(temp, temp + vertexCount, max);
+    }
+
+    for (size_t a = 0; a < vertexCount; a++) {
+        distances[a][a] = 0;
+
+        for (size_t const& b : edges[a])
+            distances[a][b] = 1;
+    }
 
     // calculate shortest distances for every pair of vertices
     for (size_t k = 0; k < vertexCount; k++)
