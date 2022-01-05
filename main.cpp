@@ -15,6 +15,8 @@ int main(int argc, char* argv[]) {
     size_t r; // used by GrowthIterative model
     char s[128]; // used by Kronecker model
 
+    bool printOnly = (argc > 1 and strcmp(argv[1], "p") == 0);
+
     Model* m;
 
     while (scanf("%hu", &modelIndex) != EOF)
@@ -37,6 +39,12 @@ int main(int argc, char* argv[]) {
             case KRONECKER_:
                 if (scanf("%s", s) == EOF)
                     continue;
+
+                // if (k > 3 and strlen(s) > 25) {
+                //     printf("0\n");
+                //     continue;
+                // }
+
                 m = new Kronecker(k, s);
                 break;
             default:
@@ -44,8 +52,10 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
-            // m->print();
-            printf("%u\n", m->calculate());
+            if (printOnly)
+                m->print();
+            else
+                printf("%u\n", m->calculate());
 
             delete m;
         }
