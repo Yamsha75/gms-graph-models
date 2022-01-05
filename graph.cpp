@@ -122,11 +122,12 @@ unsigned int Graph::calculateFW() const {
     // calculate shortest distances for every pair of vertices
     for (size_t k = 0; k < vertexCount; k++)
         for (size_t i = 0; i < vertexCount; i++)
-            for (size_t j = i + 1; j < vertexCount; j++)
-                if (distances[i][j] > distances[i][k] + distances[k][j]) {
-                    distances[i][j] = distances[i][k] + distances[k][j];
-                    distances[j][i] = distances[i][k] + distances[k][j];
-                }
+            if (distances[i][k] != max)
+                for (size_t j = i + 1; j < vertexCount; j++)
+                    if (distances[i][j] > distances[i][k] + distances[k][j]) {
+                        distances[i][j] = distances[i][k] + distances[k][j];
+                        distances[j][i] = distances[i][k] + distances[k][j];
+                    }
 
     // calculate sum of shortest distances between every pair of vertices
     unsigned int result = 0;
