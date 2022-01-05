@@ -9,11 +9,13 @@ class Graph {
 
 private:
     size_t vertexCount = 0;
-    std::vector<Neighbours> edges;
+    Neighbours* edges;
 
 public:
-    Graph(size_t size) : edges(size) {};
+    Graph(size_t size) : edges(new Neighbours[size]) {};
     Graph(const Graph& other);
+
+    ~Graph() { delete[] edges; };
 
     size_t len() const { return vertexCount; };
 
