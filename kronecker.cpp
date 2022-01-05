@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <string.h>
 #include <math.h>
 
@@ -16,37 +17,43 @@ Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t base
 
     // apply strong product <iterations - 1> times
     Graph H = Graph(graph);
+    size_t hCount = H.len();
 
     for (size_t k = 2; k <= iterations; k++) {
         Graph G = Graph(graph);
 
         size_t gCount = G.len();
 
-        for (size_t n = 1; n < H.len(); n++)
+        // for each vertex x, y:
+        // - x1, y1 are vertex IDs in G
+        // - x2, y2 are vertex IDs in H
+
+        // "vertical" edges
+        for (size_t n = 1; n < hCount; n++)
             graph.merge(G);
 
-        // for each vertex x or y:
-        // - x1 and y1 are vertex IDs in G
-        // - x2 and y2 are vertex IDs in H
-        for (size_t x = 0; x < graph.len(); x++)
-            for (size_t y = x + 1; y < graph.len(); y++) {
-                if (graph.areVerticesNeighbours(x, y))
-                    // vertices x and y are already connected
-                    continue;
+        size_t vertexCount = graph.len();
 
-                size_t x1 = x % gCount;
-                size_t y1 = y % gCount;
+        for (size_t x2 = 0; x2 < hCount; x2++)
+            for (size_t y2 = x2 + 1; y2 < hCount; y2++)
+                if (H.areVerticesNeighbours(x2, y2)) {
+                    // "horizontal" edges
+                    for (size_t g = 0; g < gCount; g++)
+                        graph.addEdge(g + x2 * gCount, g + y2 * gCount);
 
-                size_t x2 = x / gCount;
-                size_t y2 = y / gCount;
+                    // "diagonal" edges
+                    for (size_t x1 = 0; x1 < gCount; x1++) {
+                        size_t x = x1 + x2 * gCount;
 
-                if ((x1 == y1 and H.areVerticesNeighbours(x2, y2)) or
-                    (x2 == y2 and G.areVerticesNeighbours(x1, y1)) or
-                    (G.areVerticesNeighbours(x1, y1) and H.areVerticesNeighbours(x2, y2)))
-                {
-                    graph.addEdge(x, y);
+                        for (size_t y1 = 0; y1 < gCount; y1++)
+                            if (x1 != y1 and G.areVerticesNeighbours(x1, y1)) {
+                                size_t y = y1 + y2 * gCount;
+
+                                if (not graph.areVerticesNeighbours(y, x))
+                                    graph.addEdge(x, y);
+                            }
+                    }
                 }
-            }
     }
 }
 
