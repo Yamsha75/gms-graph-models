@@ -110,22 +110,21 @@ unsigned int MatrixGraph::calculateFW() const {
 
     unsigned int** distances = new unsigned int* [vertexCount];
 
-    for (size_t v = 0; v < vertexCount; v++) {
+    for (size_t a = 0; a < vertexCount; a++) {
         unsigned int* temp = new unsigned int[vertexCount];
 
-        distances[v] = temp;
+        distances[a] = temp;
 
-        std::fill(temp, temp + vertexCount, max); // init all to <max> value
-    }
+        // set all distances from <a> to <max> value
+        std::fill(temp, temp + vertexCount, max);
 
-    for (size_t a = 0; a < vertexCount; a++) {
+        // set distance from <a> to <a> to 0
         distances[a][a] = 0;
 
-        for (size_t b = a + 1; b < vertexCount; b++)
-            if (edges[a][b]) {
+        // set all distances from <a> to each neighbour to 1
+        for (size_t b = 0; b < vertexCount; b++)
+            if (edges[a][b])
                 distances[a][b] = 1;
-                distances[b][a] = 1;
-            }
     }
 
     // calculate shortest distances for every pair of vertices
@@ -133,10 +132,8 @@ unsigned int MatrixGraph::calculateFW() const {
         for (size_t i = 0; i < vertexCount; i++)
             if (distances[i][k] != max)
                 for (size_t j = i + 1; j < vertexCount; j++)
-                    if (distances[i][j] > distances[i][k] + distances[k][j]) {
-                        distances[i][j] = distances[i][k] + distances[k][j];
-                        distances[j][i] = distances[i][k] + distances[k][j];
-                    }
+                    if (distances[i][j] > distances[i][k] + distances[k][j])
+                        distances[i][j] = distances[j][i] = distances[i][k] + distances[k][j];
 
     // calculate sum of shortest distances between every pair of vertices
     unsigned int result = 0;
