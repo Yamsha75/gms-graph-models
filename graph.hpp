@@ -1,36 +1,26 @@
 #pragma once
 
-#include <list>
 #include <vector>
 
 
 class Graph {
-    typedef std::list<size_t> Neighbours;
-
-private:
+protected:
     size_t vertexCount = 0;
-    Neighbours* edges;
 
 public:
-    Graph(size_t size) : edges(new Neighbours[size]) {};
-    Graph(const Graph& other);
-
-    ~Graph() { delete[] edges; };
+    virtual ~Graph() {};
 
     size_t len() const { return vertexCount; };
 
-    size_t addVertex();
-    size_t addVertex(const std::vector<size_t>& neighbours);
+    size_t addVertex() { return vertexCount++; };
+    virtual size_t addVertex(const std::vector<size_t>& neighbours) = 0;
 
-    void addEdge(size_t a, size_t b);
+    virtual void addEdge(size_t a, size_t b) = 0;
 
-    bool areVerticesNeighbours(size_t a, size_t b) const;
-    const Neighbours getVertexNeighbours(size_t v) const;
+    virtual bool areVerticesNeighbours(size_t a, size_t b) const = 0;
 
-    size_t merge(const Graph& other);
+    virtual unsigned int calculateBFS() const = 0;
+    virtual unsigned int calculateFW() const = 0;
 
-    unsigned int calculateBFS() const;
-    unsigned int calculateFW() const;
-
-    void print() const;
+    virtual void printEdges() const = 0;
 };

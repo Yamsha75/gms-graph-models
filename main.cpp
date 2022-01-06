@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
             }
 
             if (printOnly)
-                m->print();
+                m->printGraph();
             else
                 printf("%u\n", m->calculate());
 

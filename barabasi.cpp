@@ -3,28 +3,31 @@
 #include <queue>
 
 #include "barabasi.hpp"
+#include "lst_graph.hpp"
 
 
-Barabasi::Barabasi(size_t iterations, size_t vertexCount) : Model(vertexCount), iterations(iterations), ternary(vertexCount) {
+Barabasi::Barabasi(size_t iterations, size_t vertexCount) : iterations(iterations), ternary(vertexCount){
+    ListGraph* g = new ListGraph(vertexCount);
+
     // step 0
-    graph.addVertex();
+    g->addVertex();
 
     // step 1
     if (iterations >= 1) {
-        graph.addVertex({ 0 });
-        graph.addVertex({ 0 });
+        g->addVertex({ 0 });
+        g->addVertex({ 0 });
     }
 
     // further steps
     for (unsigned short int step = 2; step <= iterations; step++) {
-        const Graph gc = Graph(graph);
+        const ListGraph gc = ListGraph(*g);
 
         for (unsigned int _ = 0; _ < 2; _++) {
-            size_t offset = graph.merge(gc);
+            size_t offset = g->merge(gc);
 
             for (auto const& v : gc.getVertexNeighbours(0))
                 if (gc.getVertexNeighbours(v).size() == step - 1)
-                    graph.addEdge(0, v + offset);
+                    g->addEdge(0, v + offset);
         }
     }
 
@@ -34,6 +37,8 @@ Barabasi::Barabasi(size_t iterations, size_t vertexCount) : Model(vertexCount), 
 
     for (size_t v = 0; v < max; v++)
         ternary[v] = toTernary(v);
+
+    graph = g;
 }
 
 Barabasi::Barabasi(size_t iterations) : Barabasi(iterations, (size_t)pow(3.0f, (double)iterations)) {};
@@ -116,7 +121,7 @@ unsigned int Barabasi::calculate() const {
     if (iterations == 1)
         return 2;
 
-    size_t third = graph.len() / 3;
+    size_t third = graph->len() / 3;
 
     // sum of shortest distances between root and every vertex with oldest base3 digit == 0
     unsigned int sum00 = calculateAllDistancesToRoot(1, third);

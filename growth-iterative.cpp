@@ -1,13 +1,17 @@
 #include <algorithm>
 #include <cmath>
+#include <list>
 
 #include "growth-iterative.hpp"
+#include "lst_graph.hpp"
 
 
-GrowthIterative::GrowthIterative(size_t iterations, size_t newVertices, size_t vertexCount) : Model(vertexCount) {
+GrowthIterative::GrowthIterative(size_t iterations, size_t newVertices, size_t vertexCount) {
+    graph = new ListGraph(vertexCount);
+
     // step 0
-    graph.addVertex();
-    graph.addVertex({ 0 });
+    graph->addVertex();
+    graph->addVertex({ 0 });
 
     // edges created in k-1
     std::list<Edge> edges = { Edge(0, 1) };
@@ -25,7 +29,7 @@ GrowthIterative::GrowthIterative(size_t iterations, size_t newVertices, size_t v
             std::vector<size_t> neighbours = { edge.first, edge.second };
 
             for (size_t i = 0; i < newVertices; i++) {
-                size_t v = graph.addVertex(neighbours);
+                size_t v = graph->addVertex(neighbours);
 
                 distances[edge.first][v] = 1;
                 distances[edge.second][v] = 1;

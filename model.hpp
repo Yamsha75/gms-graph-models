@@ -5,12 +5,12 @@
 
 class Model {
 protected:
-    Graph graph;
+    Graph* graph;
 
 public:
-    Model(size_t vertexCount) : graph(vertexCount) {};
+    ~Model() { delete graph; };
 
     virtual unsigned int calculate() const = 0;
 
-    void print() const { graph.print(); };
+    void printGraph() { graph->printEdges(); };
 };

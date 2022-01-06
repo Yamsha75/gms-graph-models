@@ -2,63 +2,67 @@
 #include <cstdio>
 #include <queue>
 
-#include "graph.hpp"
+#include "mtx_graph.hpp"
 
 
-Graph::Graph(const Graph& other) : Graph(other.vertexCount) {
+MatrixGraph::MatrixGraph(size_t size) : size(size) {
+    edges = new bool* [size];
+
+    for (size_t i = 0; i < size; i++)
+        edges[i] = new bool[size](); // init false
+}
+
+MatrixGraph::MatrixGraph(const MatrixGraph& other) : MatrixGraph(other.vertexCount) {
     vertexCount = other.vertexCount;
 
     for (size_t a = 0; a < vertexCount; a++)
-        edges[a] = Neighbours(other.edges[a]);
+        std::copy(other.edges[a], other.edges[a] + vertexCount, edges[a]);
 }
 
-size_t Graph::addVertex() {
-    return vertexCount++;
+MatrixGraph::~MatrixGraph() {
+    for (size_t i = 0; i < size; i++)
+        delete[] edges[i];
+
+    delete[] edges;
 }
 
-size_t Graph::addVertex(const std::vector<size_t>& neighbours) {
+size_t MatrixGraph::addVertex(const std::vector<size_t>& neighbours) {
     size_t v = vertexCount++;
 
     for (size_t const& n : neighbours) {
-        edges[v].push_back(n);
-        edges[n].push_back(v);
+        edges[v][n] = true;
+        edges[n][v] = true;
     }
 
     return v;
 }
 
-void Graph::addEdge(size_t a, size_t b) {
-    edges[a].push_back(b);
-    edges[b].push_back(a);
+void MatrixGraph::addEdge(size_t a, size_t b) {
+    edges[a][b] = true;
+    edges[b][a] = true;
 }
 
-bool Graph::areVerticesNeighbours(size_t a, size_t b) const {
-    for (size_t const& n : edges[a])
-        if (n == b)
-            return true;
-
-    return false;
+bool MatrixGraph::areVerticesNeighbours(size_t a, size_t b) const {
+    return edges[a][b];
 }
 
-const Graph::Neighbours Graph::getVertexNeighbours(size_t v) const {
-    return edges[v];
-}
-
-size_t Graph::merge(const Graph& other) {
+size_t MatrixGraph::merge(const MatrixGraph& other) {
     size_t offset = vertexCount;
 
     vertexCount += other.vertexCount;
 
-    for (size_t v = 0; v < other.vertexCount; v++)
-        for (size_t const& n : other.edges[v])
-            if (n > v) // skip doubling edges
-                addEdge(v + offset, n + offset);
+    for (size_t a = 0; a < other.vertexCount; a++)
+        for (size_t b = a + 1; b < other.vertexCount; b++)
+            if (other.edges[a][b]) {
+                edges[a + offset][b + offset] = true;
+                edges[b + offset][a + offset] = true;
+            }
 
     return offset;
 }
 
-unsigned int Graph::calculateBFS() const {
-    // init
+unsigned int MatrixGraph::calculateBFS() const {
+    // iinit
     unsigned int sum = 0;
 
     std::queue<size_t> open = {};
@@ -73,16 +77,18 @@ unsigned int Graph::calculateBFS() const {
         distances[s] = 0;
 
         while (!open.empty()) {
-            size_t v = open.front();
+            size_t a = open.front();
             open.pop();
 
-            unsigned int distance = distances[v] + 1;
+            unsigned int distance = distances[a] + 1;
 
-            for (size_t const& n : edges[v])
-                if (!visited[n]) {
-                    open.push(n);
-                    visited[n] = true;
-                    distances[n] = distance;
+            bool* neighbours = edges[a];
+
+            for (size_t b = 0; b < vertexCount; b++)
+                if (neighbours[b] and not visited[b]) {
+                    open.push(b);
+                    visited[b] = true;
+                    distances[b] = distance;
                 }
         }
 
@@ -98,7 +104,7 @@ unsigned int Graph::calculateBFS() const {
     return sum / 2;
 }
 
-unsigned int Graph::calculateFW() const {
+unsigned int MatrixGraph::calculateFW() const {
     // init
     const unsigned int max = std::numeric_limits<unsigned int>::max() / 3;
 
@@ -109,14 +115,17 @@ unsigned int Graph::calculateFW() const {
 
         distances[v] = temp;
 
-        std::fill(temp, temp + vertexCount, max);
+        std::fill(temp, temp + vertexCount, max); // init all to <max> value
     }
 
     for (size_t a = 0; a < vertexCount; a++) {
         distances[a][a] = 0;
 
-        for (size_t const& b : edges[a])
-            distances[a][b] = 1;
+        for (size_t b = a + 1; b < vertexCount; b++)
+            if (edges[a][b]) {
+                distances[a][b] = 1;
+                distances[b][a] = 1;
+            }
     }
 
     // calculate shortest distances for every pair of vertices
@@ -147,12 +156,12 @@ unsigned int Graph::calculateFW() const {
     return result;
 }
 
-void Graph::print() const {
-    for (size_t v = 0; v < vertexCount; v++)
-        printf("%zu\n", v);
+void MatrixGraph::printEdges() const {
+    for (size_t a = 0; a < vertexCount; a++) {
+        bool* neighbours = edges[a];
 
-    for (size_t v = 0; v < vertexCount; v++)
-        for (size_t const& n : edges[v])
-            if (n > v) // skip doubling edges
-                printf("%zu %zu\n", v, n);
+        for (size_t b = a + 1; b < vertexCount; b++)
+            if (neighbours[b])
+                printf("%zu %zu\n", a, b);
+    }
 }

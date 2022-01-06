@@ -3,26 +3,31 @@
 #include <cstring>
 
 #include "kronecker.hpp"
+#include "mtx_graph.hpp"
 
 
-Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t baseVertexCount)
-    : Model((size_t)pow((double)baseVertexCount, (double)iterations)), baseVertexCount(baseVertexCount)
-{
+Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t baseVertexCount) {
+    size_t vertexCount = (size_t)pow((double)baseVertexCount, (double)iterations);
+
+    graph = new MatrixGraph(vertexCount);
+
+    MatrixGraph* g = dynamic_cast<MatrixGraph*>(graph);
+
     // recreate base graph from given adjacency matrix
     for (size_t v = 0; v < baseVertexCount; v++)
-        graph.addVertex();
+        g->addVertex();
 
     for (size_t a = 0; a < baseVertexCount; a++)
         for (size_t b = a + 1; b < baseVertexCount; b++)
             if (adjacencyMatrix[a * baseVertexCount + b] == '1')
-                graph.addEdge(a, b);
+                g->addEdge(a, b);
 
     // apply strong product <iterations - 1> times
-    Graph H = Graph(graph);
+    MatrixGraph H = MatrixGraph(*g);
     size_t hCount = H.len();
 
     for (size_t k = 2; k <= iterations; k++) {
-        Graph G = Graph(graph);
+        MatrixGraph G = MatrixGraph(*g);
 
         size_t gCount = G.len();
 
@@ -32,14 +37,14 @@ Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t base
 
         // "vertical" edges
         for (size_t n = 1; n < hCount; n++)
-            graph.merge(G);
+            g->merge(G);
 
         for (size_t x2 = 0; x2 < hCount; x2++)
             for (size_t y2 = x2 + 1; y2 < hCount; y2++)
                 if (H.areVerticesNeighbours(x2, y2)) {
                     // "horizontal" edges
-                    for (size_t g = 0; g < gCount; g++)
-                        graph.addEdge(g + x2 * gCount, g + y2 * gCount);
+                    for (size_t v = 0; v < gCount; v++)
+                        g->addEdge(v + x2 * gCount, v + y2 * gCount);
 
                     // "diagonal" edges
                     for (size_t x1 = 0; x1 < gCount; x1++) {
@@ -49,8 +54,8 @@ Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t base
                             if (x1 != y1 and G.areVerticesNeighbours(x1, y1)) {
                                 size_t y = y1 + y2 * gCount;
 
-                                if (not graph.areVerticesNeighbours(y, x))
-                                    graph.addEdge(x, y);
+                                if (not graph->areVerticesNeighbours(y, x))
+                                    g->addEdge(x, y);
                             }
                     }
                 }
@@ -62,5 +67,5 @@ Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix)
     : Kronecker(iterations, adjacencyMatrix, (size_t)sqrt((double)strlen(adjacencyMatrix))) {};
 
 unsigned int Kronecker::calculate() const {
-    return graph.calculateFW();
+    return graph->calculateFW();
 }
