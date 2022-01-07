@@ -69,5 +69,76 @@ Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix)
     : Kronecker(iterations, adjacencyMatrix, (size_t)sqrt((double)strlen(adjacencyMatrix))) {};
 
 unsigned int Kronecker::calculate() const {
-    return graph->calculateFW();
+    // init
+    const unsigned int max = std::numeric_limits<unsigned int>::max() / 3;
+
+    size_t vertexCount = graph->len();
+
+    unsigned int** distances = new unsigned int* [vertexCount];
+
+    for (size_t a = 0; a < vertexCount; a++) {
+        unsigned int* temp = new unsigned int[vertexCount];
+
+        distances[a] = temp;
+
+        // set all distances from max value
+        std::fill_n(temp, vertexCount, max);
+    }
+
+    for (size_t a = 0; a < vertexCount; a++) {
+        // set distance to self
+        distances[a][a] = 0;
+
+        // set all distances to each neighbour
+        for (size_t b = a + 1; b < vertexCount; b++)
+            if (graph->areVerticesNeighbours(a, b))
+                distances[a][b] = distances[b][a] = 1;
+    }
+
+    // simplified Floyd-Warshall algorithm for vertices belonging to the original input graph
+    for (size_t k = 0; k < baseVertexCount; k++)
+        for (size_t a = 0; a < baseVertexCount; a++)
+            if (distances[a][k] != max)
+                for (size_t b = a + 1; b < baseVertexCount; b++)
+                    if (distances[a][b] > distances[a][k] + distances[k][b])
+                        distances[a][b] = distances[b][a] = distances[a][k] + distances[k][b];
+
+    // distances between all other vertex pairs can be simplified to paths in the original input graph
+    for (size_t a = 0; a < vertexCount; a++)
+        for (size_t b = a + 1; b < vertexCount; b++) {
+            size_t a1 = a % baseVertexCount;
+            size_t a2 = a / baseVertexCount;
+
+            size_t b1 = b % baseVertexCount;
+            size_t b2 = b / baseVertexCount;
+
+            // a1, b1 are vertices in input graph on the left side of strong product operation
+            // a2, b2 are vertices in input graph on the right side of strong product operation
+
+            if (a1 == b1)
+                // path a-b can be simplified to a2-b2
+                distances[a][b] = distances[b][a] = distances[a2][b2];
+            else if (a2 == b2)
+                // path a-b can be simplified to a1-b1
+                distances[a][b] = distances[b][a] = distances[a1][b1];
+            else
+                // path a-b can be simplified to max(a1-b1, a2-b2)
+                distances[a][b] = distances[b][a] = std::max(distances[a1][b1], distances[a2][b2]);
+        }
+
+    unsigned int result = 0;
+
+    for (size_t a = 0; a < vertexCount; a++)
+        for (size_t b = a + 1; b < vertexCount; b++)
+            result += distances[a][b];
+
+    // cleanup
+    for (size_t v = 0; v < vertexCount; v++) {
+        delete[] distances[v];
+    }
+
+    delete[] distances;
+
+    // return
+    return result;
 }
