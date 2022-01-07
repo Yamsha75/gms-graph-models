@@ -72,7 +72,7 @@ unsigned int MatrixGraph::calculateBFS() const {
     // calculate shortest distances for every pair of vertices
     for (size_t s = 0; s < vertexCount; s++) {
         open.push(s);
-        std::fill(visited, visited + vertexCount, false);
+        std::fill_n(visited, vertexCount, false);
         visited[s] = true;
         distances[s] = 0;
 
@@ -116,7 +116,7 @@ unsigned int MatrixGraph::calculateFW() const {
         distances[a] = temp;
 
         // set all distances from <a> to <max> value
-        std::fill(temp, temp + vertexCount, max);
+        std::fill_n(temp, vertexCount, max);
 
         // set distance from <a> to <a> to 0
         distances[a][a] = 0;

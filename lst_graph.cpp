@@ -64,7 +64,7 @@ unsigned int ListGraph::calculateBFS() const {
     // calculate shortest distances for every pair of vertices
     for (size_t s = 0; s < vertexCount; s++) {
         open.push(s);
-        std::fill(visited, visited + vertexCount, false);
+        std::fill_n(visited, vertexCount, false);
         visited[s] = true;
         distances[s] = 0;
 
@@ -105,7 +105,7 @@ unsigned int ListGraph::calculateFW() const {
 
         distances[v] = temp;
 
-        std::fill(temp, temp + vertexCount, max); // init all to <max> value
+        std::fill_n(temp, vertexCount, max); // init all to <max> value
     }
 
     for (size_t a = 0; a < vertexCount; a++) {
