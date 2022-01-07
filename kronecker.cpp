@@ -6,7 +6,9 @@
 #include "mtx_graph.hpp"
 
 
-Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t baseVertexCount) {
+Kronecker::Kronecker(size_t iterations, const char* adjacencyMatrix, size_t baseVertexCount)
+    : baseVertexCount(baseVertexCount)
+{
     size_t vertexCount = (size_t)pow((double)baseVertexCount, (double)iterations);
 
     graph = new MatrixGraph(vertexCount);
