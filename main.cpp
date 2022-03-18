@@ -40,11 +40,6 @@ int main(int argc, char* argv[]) {
                 if (scanf("%s", s) == EOF)
                     continue;
 
-                // if (k > 3 and strlen(s) > 25) {
-                //     printf("0\n");
-                //     continue;
-                // }
-
                 m = new Kronecker(k, s);
                 break;
             default:
